@@ -26,7 +26,8 @@ public class CompareFiles
 {
 	 Map<String, AudioProcessableFile> filesProcessedPath1;
 	 Map<String, AudioProcessableFile> filesProcessedPath2;
-	 
+	 private final String TEMP_DIR_1_PATH = "/tmp/TempDir1";
+	 private final String TEMP_DIR_2_PATH = "/tmp/TempDir2";
 	 /**
 	  * CompareFiles: String[] -> void
 	  * @param args : the command line arguments
@@ -41,7 +42,29 @@ public class CompareFiles
 		  secondPathFiles = parseArgAndPath(args[2], args[3]);
 		  filesProcessedPath1 = new HashMap<String, AudioProcessableFile>();
 		  filesProcessedPath2 = new HashMap<String, AudioProcessableFile>();
+		  createTempDir(TEMP_DIR_1_PATH);
+		  createTempDir(TEMP_DIR_2_PATH);
 		  compareAllFiles(firstPathFiles,secondPathFiles);	
+	 }
+	 
+	 private void createTempDir(String dirPath)
+	 {
+		ProcessBuilder pbdir = new ProcessBuilder("mkdir", dirPath);
+     	try 
+     	{
+     		Process p1 = pbdir.start();
+     		p1.waitFor();
+		} 
+     	catch (IOException e1) 
+     	{
+     		// TODO Auto-generated catch block
+     		e1.printStackTrace();
+		} 
+     	catch (InterruptedException e) 
+     	{
+     		// TODO Auto-generated catch block
+     		e.printStackTrace();
+		}
 	 }
 	 
 	 /**
@@ -124,14 +147,14 @@ public class CompareFiles
 		  for(int path1Count=0; path1Count<NoOfFilesInPath1; path1Count++)
 		  {
 			   File currentFile = firstPathNameFiles[path1Count];
-			   AudioProcessableFile path1File = getDirOneProcessableFile(currentFile);
+			   AudioProcessableFile path1File = getDirOneProcessableFile(currentFile, TEMP_DIR_1_PATH+"/");
 			   if(path1File==null)
 				   continue;
 			   for(int path2Count=0; path2Count<NoOfFilesInPath2;path2Count++)
 			   {
 				    File currentSecondFile = secondPathNameFiles[path2Count];
 				    AudioProcessableFile path2File = 
-						  getProcessableFile2(currentSecondFile);
+						  getProcessableFile2(currentSecondFile, TEMP_DIR_2_PATH+"/");
 				    System.out.println("Compare:"+currentFile.getName() +" & "+currentSecondFile.getName());
 				    if(path2File==null)
 					    continue;
@@ -145,8 +168,8 @@ public class CompareFiles
 
 			   }
 		  }
-		  deleteAllMp3Files(filesProcessedPath1);
-		  deleteAllMp3Files(filesProcessedPath2);
+		 // deleteAllMp3Files(filesProcessedPath1);
+		 // deleteAllMp3Files(filesProcessedPath2);
 		  AssertTests.exitWithValidStatus();
 	 }
 	 
@@ -156,23 +179,23 @@ public class CompareFiles
 	  * @return: AudioProcessibleFile of the given file, also the file 
 	  * is added to the HashMap.
 	  */
-	 private AudioProcessableFile getDirOneProcessableFile(File fileToProcess)
+	 private AudioProcessableFile getDirOneProcessableFile(File fileToProcess, String tmpDirPath)
 	 {
 		 AudioProcessableFile f = filesProcessedPath1.get(fileToProcess.getPath());
 	 	 if(f == null)
 	 	 {
-			   f = AudioProcessableFiles.make(fileToProcess);
+			   f = AudioProcessableFiles.make(fileToProcess, tmpDirPath);
 			   filesProcessedPath1.put(fileToProcess.getPath(), f);
 		  }
 		  return f;
 	 }
 	 
-	 private AudioProcessableFile getProcessableFile2(File fileToProcess)
+	 private AudioProcessableFile getProcessableFile2(File fileToProcess, String tmpDirPath)
 	 {
 		 AudioProcessableFile f = filesProcessedPath2.get(fileToProcess.getPath());
 	 	 if(f == null)
 	 	 {
-			   f = AudioProcessableFiles.make(fileToProcess);
+			   f = AudioProcessableFiles.make(fileToProcess, tmpDirPath);
 			   filesProcessedPath2.put(fileToProcess.getPath(), f);
 		  }
 		  return f;
