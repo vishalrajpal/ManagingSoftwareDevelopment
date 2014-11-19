@@ -44,51 +44,14 @@ public abstract class Utilities
     static void printMatchAndExit(String fileName1, String fileName2, double firstOffset, double secondOffset) 
     {
         System.out.printf("MATCH " + fileName1 + " " + fileName2);
-        System.out.printf(" %.2f %.2f%n", firstOffset, secondOffset);
+        System.out.printf(" %.1f %.1f%n", (Math.round(firstOffset*10))/10.0, Math.round(secondOffset*10)/10.0);
     }
 	
     static void printNoMatchAndExit(String fileName1, String fileName2) 
     {
         System.out.println("NO MATCH " + fileName1 + " " + fileName2);
     }
-    
-    static int longestCommonSubLen(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2, Integer beginIndex1)
-	{
-		int lenOfStr1 = magnitudes1.size();
-		int lenOfStr2 = magnitudes2.size();
-		int[][] opt = new int[lenOfStr1 + 1][lenOfStr2 + 1]; 
-		float epsilon = 0.009f;
-		int longestSubStringLength = 0;
-		//int beginIndex1 = -1;
-		int beginIndex2 = -1;
-		
-		for(int i = 1; i <= lenOfStr1; i++)
-		{
-			double list1CurrentMag = magnitudes1.get(i-1);
-			for(int j = 1; j <= lenOfStr2; j++)
-			{
-				if(Math.abs(list1CurrentMag - magnitudes2.get(j-1))<epsilon)
-				{
-					opt[i][j] = 1 + opt[i-1][j-1];
-					if(opt[i][j]>longestSubStringLength)
-					{						
-						longestSubStringLength = opt[i][j];
-						beginIndex1 = i - longestSubStringLength;
-						beginIndex2 = j - longestSubStringLength;
-					}
-				}
-				else 
-				{
-					opt[i][j] = 0;
-				}
-			}
-			
-		}
-		System.out.println(beginIndex1+"From Util");			
-		return longestSubStringLength;
-	}
-    
-    
+        
     static void executeCommand(String... commandAndArgs)
     {
     	ProcessBuilder pb = new ProcessBuilder(commandAndArgs);
