@@ -1,27 +1,42 @@
 package com.msd;
-public class AssertTests {
+public class AssertTests 
+{
+  private static int exitStatus = 0;
   /**
-   * assertTrue : String, boolean -> void
+   * assertTrue : String, Boolean -> Boolean
    * 
    * @param errorMsg
    *            : The errorMsg to print if 'isTrue' is false
    * @param isTrue
    *            : if false the 'errorMsg' is printed through standard error
-   *            and the program exits through status other than 0.
+   *            and the program exits with status other than 0.
+   * @return 
+   *            : returns false if isTrue is false else returns true            
    */
-  private static int exitStatus = 0;
-
   public static boolean assertTrue(String errorMsg, boolean isTrue) 
   {
-    if (!isTrue) 
-    {
-      exitStatus = 1;
-      System.err.println("ERROR: " + errorMsg);
-      return false;
-    }
-    return isTrue;
+     if (!isTrue) 
+     { 
+        exitStatus = 1;
+        System.err.println("ERROR: " + errorMsg);
+        return false;
+     }
+     return isTrue;
   }
 
+  /**
+   * assertTrue : String, Boolean, Boolean -> Boolean/void
+   * @param errorMsg 
+   *               : The error message to print if isTrue is false 
+   * @param isTrue
+   *               : if false the 'errorMsg' is printed through standard error
+   *            and the program exits with status other than 0.
+   * @param toExit 
+   *               : if true and isTrue is false program exits with status
+   *               other than 0
+   * @return        
+   *               : returns the value of isTrue;
+   */
   public static boolean assertTrue(String errorMsg, boolean isTrue,
 		  boolean toExit) 
   {
@@ -30,6 +45,10 @@ public class AssertTests {
      return isTrue;
   }
 
+  /**
+   * exitWithValidStatus : Void -> Void
+   * when called, program exits with exit status 0.
+   */
   public static void exitWithValidStatus() 
   {
      System.exit(exitStatus);
