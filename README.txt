@@ -40,5 +40,5 @@ a) lame (www.mp3dev.org) : To convert files from .mp3 format to .wav format
 
 b) Java implementations of the FFT 
 (www.ee.columbia.edu/~ronw/code/MEAPsoft/doc/html/FFT_8java-source.html)
-Authorized by the Professor William D. Clinger on 10/15/14.
+Authorized by Professor William D. Clinger on 10/15/14.
 
