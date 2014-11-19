@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+
 /**
  * Class: CompareFiles: This class processes the paths of files/directories 
  * provided to us, gets those files and stores it in an array. The 2 array's 
@@ -42,29 +43,9 @@ public class CompareFiles
 		  secondPathFiles = parseArgAndPath(args[2], args[3]);
 		  filesProcessedPath1 = new HashMap<String, AudioProcessableFile>();
 		  filesProcessedPath2 = new HashMap<String, AudioProcessableFile>();
-		  createTempDir(TEMP_DIR_1_PATH);
-		  createTempDir(TEMP_DIR_2_PATH);
+		  Utilities.executeCommand("mkdir", TEMP_DIR_1_PATH);
+		  Utilities.executeCommand("mkdir", TEMP_DIR_2_PATH);
 		  compareAllFiles(firstPathFiles,secondPathFiles);	
-	 }
-	 
-	 private void createTempDir(String dirPath)
-	 {
-		ProcessBuilder pbdir = new ProcessBuilder("mkdir", dirPath);
-     	try 
-     	{
-     		Process p1 = pbdir.start();
-     		p1.waitFor();
-		} 
-     	catch (IOException e1) 
-     	{
-     		// TODO Auto-generated catch block
-     		e1.printStackTrace();
-		} 
-     	catch (InterruptedException e) 
-     	{
-     		// TODO Auto-generated catch block
-     		e.printStackTrace();
-		}
 	 }
 	 
 	 /**
@@ -144,32 +125,41 @@ public class CompareFiles
 	 {
 		  int NoOfFilesInPath1 = firstPathNameFiles.length;
 		  int NoOfFilesInPath2 = secondPathNameFiles.length;
+		  String tmpDir1FilePath = TEMP_DIR_1_PATH+"/";
+		  String tmpDir2FilePath = TEMP_DIR_2_PATH+"/";
 		  for(int path1Count=0; path1Count<NoOfFilesInPath1; path1Count++)
 		  {
 			   File currentFile = firstPathNameFiles[path1Count];
-			   AudioProcessableFile path1File = getDirOneProcessableFile(currentFile, TEMP_DIR_1_PATH+"/");
+			   AudioProcessableFile path1File = getDirOneProcessableFile(currentFile, tmpDir1FilePath);
 			   if(path1File==null)
 				   continue;
 			   for(int path2Count=0; path2Count<NoOfFilesInPath2;path2Count++)
 			   {
 				    File currentSecondFile = secondPathNameFiles[path2Count];
 				    AudioProcessableFile path2File = 
-						  getProcessableFile2(currentSecondFile, TEMP_DIR_2_PATH+"/");
-				    System.out.println("Compare:"+currentFile.getName() +" & "+currentSecondFile.getName());
+						  getProcessableFile2(currentSecondFile, tmpDir2FilePath);
+
 				    if(path2File==null)
 					    continue;
-				    Calendar rightNow = Calendar.getInstance();
-					System.out.println(rightNow.get(rightNow.MINUTE)+":"+rightNow.get(rightNow.SECOND));
-
+				    
+				    if(Utilities.DEBUG_MODE_ON)
+				    {
+				    	System.out.println("Compare:"+currentFile.getName() +" & "+currentSecondFile.getName());
+				    	Calendar rightNow = Calendar.getInstance();
+				    	System.out.println(rightNow.get(rightNow.MINUTE)+":"+rightNow.get(rightNow.SECOND));
+				    }
+				    
 				    path1File.compare(path2File);
 				    
-					Calendar rightNow1 = Calendar.getInstance();
-					System.out.println(rightNow1.get(rightNow1.MINUTE)+":"+rightNow1.get(rightNow1.SECOND));
-
+				    if(Utilities.DEBUG_MODE_ON)
+				    {
+				    	Calendar rightNow1 = Calendar.getInstance();
+				    	System.out.println(rightNow1.get(rightNow1.MINUTE)+":"+rightNow1.get(rightNow1.SECOND));
+				    }
 			   }
 		  }
-		 // deleteAllMp3Files(filesProcessedPath1);
-		 // deleteAllMp3Files(filesProcessedPath2);
+		  Utilities.executeCommand("rm", "-r", TEMP_DIR_1_PATH);
+		  Utilities.executeCommand("rm", "-r", TEMP_DIR_2_PATH);
 		  AssertTests.exitWithValidStatus();
 	 }
 	 
@@ -199,47 +189,5 @@ public class CompareFiles
 			   filesProcessedPath2.put(fileToProcess.getPath(), f);
 		  }
 		  return f;
-	 }
-	 
-	 /**
-	 * deleteAllMp3Files : -> void
-	 * @effect: Deletes all the files created in the '/tmp' directory
-	 */
-	 private void deleteAllMp3Files(Map<String, AudioProcessableFile> filesProcessed)
-	 {
-		  Iterator<Entry<String, AudioProcessableFile>> mapIterator = 
-				  filesProcessed.entrySet().iterator();
-		  while(mapIterator.hasNext())
-		  {
-			   Map.Entry<String, AudioProcessableFile> currentPath = 
-					   (Entry<String, AudioProcessableFile>) mapIterator.next();
-			
-			   if(currentPath.getKey().endsWith(".mp3"))
-			   {
-				    AudioProcessableFile currentProc = currentPath.getValue();
-				    if(currentProc!=null)
-				    {
-					     String toDeleteFilePath = 
-							      "/tmp/"+currentProc.getFileShortName();
-					     ProcessBuilder pb = new ProcessBuilder("rm",toDeleteFilePath);
-					     try 
-					     {
-					    	 Process p = pb.start();
-					    	 BufferedReader reader =
-					    			 new BufferedReader(new InputStreamReader(p.getInputStream()));
-					    			 while ((reader.readLine()) != null) {}
-					    	 p.waitFor();
-					     } 
-					     catch (IOException e) 
-					     {
-					    	 AssertTests.assertTrue("Unable to delete file: "+toDeleteFilePath, false);
-					     } 
-					     catch (InterruptedException e) 
-					     {
-					    	 AssertTests.assertTrue("Unable to delete file: "+toDeleteFilePath, false); 
-				    	 }
-				    }
-			   }		
-		  }
 	 }
 }

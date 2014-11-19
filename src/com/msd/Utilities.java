@@ -1,7 +1,16 @@
 package com.msd;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 public abstract class Utilities 
 {
+	static boolean DEBUG_MODE_ON = false;
+	static int binThreshholdMatch = 350;
     /**
      * getLittleEndian : byte[], int, int -> long
      * 
@@ -15,7 +24,7 @@ public abstract class Utilities
      * @return val : The little endian value of the values in the arr starting
      *         from 'offset' and ending at 'numOfBytes' from 'offset'
      */
-    protected static long getLittleEndian(byte[] arr, int offset, int numOfBytes) 
+    static long getLittleEndian(byte[] arr, int offset, int numOfBytes) 
     {
         numOfBytes--;
         int endIndex = offset + numOfBytes;
@@ -30,13 +39,106 @@ public abstract class Utilities
         return val;
     }
     
-    protected static void printMatchAndExit(String fileName1, String fileName2) 
+    static void printMatchAndExit(String fileName1, String fileName2) 
     {
         System.out.println("MATCH " + fileName1 + " " + fileName2);
     }
 	
-    protected static void printNoMatchAndExit(String fileName1, String fileName2) 
+    static void printNoMatchAndExit(String fileName1, String fileName2) 
     {
         System.out.println("NO MATCH " + fileName1 + " " + fileName2);
+    }
+    
+    static int longestCommonSubLen(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2)
+	{
+		int longestCommonLength = 0;
+		int lenOfStr1 = magnitudes1.size();
+		int lenOfStr2 = magnitudes2.size();
+		int[][] opt = new int[lenOfStr1 + 1][lenOfStr2 + 1]; 
+		float epsilon = 0.0009f;
+		for(int i = 1; i <= lenOfStr1; i++)
+		{
+			double list1CurrentMag = magnitudes1.get(i-1);
+			for(int j = 1; j <= lenOfStr2; j++)
+			{
+				if(Math.abs(list1CurrentMag - magnitudes2.get(j-1))<epsilon)
+				{
+					opt[i][j] = 1 + opt[i-1][j-1];
+				}
+				else 
+				{
+					opt[i][j] = Math.max(opt[i-1][j], opt[i][j-1]);
+				}
+			}
+		}
+			
+		longestCommonLength = opt[lenOfStr1][lenOfStr2];		
+		return longestCommonLength;
+	}
+    
+    
+    static void executeCommand(String... commandAndArgs)
+    {
+    	ProcessBuilder pb = new ProcessBuilder(commandAndArgs);
+        try 
+        {
+            Process p = pb.start();
+            BufferedReader reader =
+	    			 new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String rd = null;
+            if(DEBUG_MODE_ON)
+            {
+            	while ((rd = reader.readLine()) != null){
+                	//System.out.println(rd);
+                }
+            }
+            else
+            {
+            	while ((rd = reader.readLine()) != null){};
+            }	
+            p.waitFor();
+            p.destroy();
+        } 
+        catch (IOException e) 
+        {
+            AssertTests.assertTrue("Unable to execute lame/wav: ", false);
+        } 
+        catch (InterruptedException e) 
+        {
+        	AssertTests.assertTrue("Unable to execute lame/wav", false);
+        }
+    }
+    
+    static void printMagnitudeLog(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2)
+    {
+    	BufferedWriter outputWriter = null;
+		try
+		{
+			outputWriter = new BufferedWriter(new FileWriter("log.txt"));
+			int loopCounter = magnitudes1.size();
+			ArrayList<Double> toIterate = magnitudes1;
+			ArrayList<Double> toLessIterate = magnitudes2;
+			
+			if(loopCounter<magnitudes2.size())
+			{
+				loopCounter=magnitudes2.size();
+				toIterate = magnitudes2;
+				toLessIterate = magnitudes1;
+			}
+			int lessIterateSize = toLessIterate.size();
+			for (int i = 0; i < loopCounter; i++) 
+			{
+			    outputWriter.write(toIterate.get(i)+ "  ");
+			    if(i<lessIterateSize)
+			    	outputWriter.write(toLessIterate.get(i)+"");
+			    outputWriter.newLine();
+			}
+			outputWriter.flush();  
+			outputWriter.close(); 
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
     }
 }

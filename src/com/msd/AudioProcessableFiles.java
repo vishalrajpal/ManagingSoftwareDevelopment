@@ -1,14 +1,16 @@
 package com.msd;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public abstract class AudioProcessableFiles
 {
+	protected final static String WAV_CONVERTER_PATH = "/course/cs5500f14/bin/wav";
+	protected final static String LAME_CONVERTER_PATH = "/usr/local/bin/lame";
+	
 	public static AudioProcessableFile make(File fileToProcess, String tmpDirPath)
 	{
 		if(fileToProcess!=null)
@@ -31,23 +33,12 @@ public abstract class AudioProcessableFiles
 		AudioProcessableFile processableFile = null;
 		if(modFilePath.endsWith(".wav"))
 		{
-			processableFile= new WAVAudioProcessableFile(fileToProcess, tmpDirPath);
+			processableFile= new WAVAudioProcessableFile(fileToProcess, tmpDirPath, fileToProcess.getName());
 		}
 		else if(modFilePath.endsWith(".mp3"))
 		{
-			//processableFile = new MP3AudioProcessableFile(filePath);
-			File mp3File = new File(filePath);
-			convertMP3ToWAVFile(processableFile, mp3File);
-			File wavFile = new File("/tmp/"+mp3File.getName()+".wav");
-			FileInputStream audioFileInputStream;
-			try 
-			{
-				audioFileInputStream = new FileInputStream(wavFile);
-			} 
-			catch (FileNotFoundException e) 
-			{
-				AssertTests.assertTrue(filePath + " File not found", false);
-	        }
+			File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
+			processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath, fileToProcess.getName());
 		}
 		else
 		{
@@ -62,39 +53,20 @@ public abstract class AudioProcessableFiles
 		return fileToReturn;
 	}
 	
-	public static void convertMP3ToWAVFile(AudioProcessableFile processableFile, File mp3File)
+	public static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
 	{
-		String newFilePath = "/tmp/" + mp3File.getName() + ".wav";
-		System.out.println("Looking for "+newFilePath+":mp3Path"+mp3File.getPath());
-        //String lamePath = "/course/cs5500f14/bin/lame";
-        String lamePath = "/usr/local/bin/lame";
-        ProcessBuilder pb = new ProcessBuilder(lamePath,"--decode", mp3File.getPath(), 
-        		newFilePath);
-        try 
-        {
-            Process p = pb.start();
-            BufferedReader reader =
-	    			 new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            while ((reader.readLine()) != null){}
-            p.waitFor();
-            p.destroy();
-        } 
-        catch (IOException e) 
-        {
-            AssertTests.assertTrue("Unable to convert file: "+mp3File.getPath(), false);
-        } 
-        catch (InterruptedException e) 
-        {
-        	AssertTests.assertTrue("Unable to convert file: "+mp3File.getPath(), false);
-        }
+		String updatedFilePath = tmpDirPath+mp3File.getName();
+    	Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample", "44.1", mp3File.getPath(), updatedFilePath);
+    	String newFilePath = updatedFilePath + ".wav";
+    	Utilities.executeCommand(LAME_CONVERTER_PATH,"--decode", updatedFilePath, newFilePath);
+    	return new File(newFilePath);
 	}
+	
+	
 
 	/** Implementation of AudioProcessableFile ADT */
     private static abstract class AudioProcessableBase implements AudioProcessableFile 
     {
-    	protected final String WAV_CONVERTER_PATH = "/course/cs5500f14/bin/wav";
-    	//protected final String LAME_CONVERTER_PATH = "/course/cs5500f14/bin/lame";
-    	protected final String LAME_CONVERTER_PATH = "/usr/local/bin/lame";
         protected boolean isValidFile = true;
         protected float[] samples = null;
         protected FileInputStream audioFileInputStream;
@@ -113,6 +85,8 @@ public abstract class AudioProcessableFiles
         public abstract String getFileShortName();
 
         public abstract double getDuration();
+        
+        public abstract ArrayList<Double> getMagnitudes();
         
         public boolean isValidFile() 
         {
@@ -149,35 +123,11 @@ public abstract class AudioProcessableFiles
             }
         }
         
-        protected void executeCommand(String... commandAndArgs)
-        {
-        	ProcessBuilder pb = new ProcessBuilder(commandAndArgs);
-            try 
-            {
-                Process p = pb.start();
-                BufferedReader reader =
-    	    			 new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                String rd = null;
-                while ((rd = reader.readLine()) != null){
-                	System.out.println(rd);
-                }
-                p.waitFor();
-                p.destroy();
-            } 
-            catch (IOException e) 
-            {
-                AssertTests.assertTrue("Unable to convert file: "+audioFile.getPath(), false);
-            } 
-            catch (InterruptedException e) 
-            {
-            	AssertTests.assertTrue("Unable to convert file: "+audioFile.getPath(), false);
-            }
-        }
-        
     }
 	
     /** Create new AudioProcessableFile */
-    private static class WAVAudioProcessableFile extends AudioProcessableBase {
+    private static class WAVAudioProcessableFile extends AudioProcessableBase 
+    {
         // Constants
         private final static int RIFF_HEXA_EQUIVALENT = 0x46464952;
         private final static int WAVE_HEXA_EQUIVALENT = 0x45564157;
@@ -199,14 +149,12 @@ public abstract class AudioProcessableFiles
         private int bytesPerSample;
         private int noOfChannels;
         private int bytesPerFrame;
-        private int samplesPerFrame;
-        private int frameLength;
         private double duration;
-        private AudioProcessableFile mp3Processable = null;
         private boolean toConvertToMonoOrResample = false;
         private boolean toChangeBitWidth = false;
         private String tmpDirPath;
         private String tmpFilePath;
+        private ArrayList<Double> magnitudes = null;
         /**
          * Constructor : String -> WAVAudioProcessableFile
          * 
@@ -216,9 +164,9 @@ public abstract class AudioProcessableFiles
          * @effect : The constructor implicitly returns an instance of type
          *         Create
          */
-        WAVAudioProcessableFile(File fileToProcess, String tmpDirPath) 
+        WAVAudioProcessableFile(File fileToProcess, String tmpDirPath, String fileName) 
         {
-            this.fileName = fileToProcess.getName();
+            this.fileName = fileName;
             this.audioFile = fileToProcess;
             this.filePath = fileToProcess.getPath();
             this.tmpDirPath = tmpDirPath;
@@ -344,23 +292,21 @@ public abstract class AudioProcessableFiles
                 fileLength = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
 
                 bytesPerFrame = bytesPerSample * noOfChannels;
-                samplesPerFrame = bytesPerFrame / bytesPerSample;
-                frameLength = (int) fileLength / bytesPerFrame;
                 duration = (double) fileLength / 
                 		(sampleRate * noOfChannels * bitsPerSample /8);
                 
                 if(toChangeBitWidth)
                 {
                 	tmpFilePath = tmpDirPath+audioFile.getName();
-                	executeCommand(WAV_CONVERTER_PATH, "-bitwidth", "16", filePath, tmpFilePath);
+                	Utilities.executeCommand(WAV_CONVERTER_PATH, "-bitwidth", "16", filePath, tmpFilePath);
                 }
                 
                 if(toConvertToMonoOrResample)
                 {
                 	String updatedFilePath = tmpDirPath+audioFile.getName()+".mp3";
-                	executeCommand(LAME_CONVERTER_PATH,"--resample", "44.1", tmpFilePath, updatedFilePath);
+                	Utilities.executeCommand(LAME_CONVERTER_PATH,"-a", "--resample", "44.1", tmpFilePath, updatedFilePath);
                 	tmpFilePath = updatedFilePath + ".wav";
-                	executeCommand(LAME_CONVERTER_PATH,"--decode", updatedFilePath, tmpFilePath);
+                	Utilities.executeCommand(LAME_CONVERTER_PATH,"--decode", updatedFilePath, tmpFilePath);
                 }
                 
                 if(toChangeBitWidth || toConvertToMonoOrResample)
@@ -388,17 +334,29 @@ public abstract class AudioProcessableFiles
          */
         public void compare(AudioProcessableFile fileToCmp) 
         {
-        	MakeFFTComparisons mf = new MakeFFTComparisons();
-            boolean areFilesSame = mf.compare(this, fileToCmp);
-            if(areFilesSame)
-            {
-            	Utilities.printMatchAndExit(getFileShortName(), fileToCmp.getFileShortName());
-            }
+        	int longestMatchSubSequenceLength = Utilities.longestCommonSubLen(getMagnitudes(), fileToCmp.getMagnitudes());
+    		if(Utilities.DEBUG_MODE_ON)
+    		{
+    			Utilities.printMagnitudeLog(getMagnitudes(), fileToCmp.getMagnitudes());
+    			System.out.println(longestMatchSubSequenceLength);
+    		}
+    		if(longestMatchSubSequenceLength>Utilities.binThreshholdMatch)
+    			Utilities.printMatchAndExit(getFileShortName(), fileToCmp.getFileShortName());
         }
         
         public double getDuration()
         {
         	return duration;
+        }
+        
+        public ArrayList<Double> getMagnitudes()
+        {
+        	if(magnitudes==null)
+        	{
+        		MakeFFTComparisons mf = new MakeFFTComparisons();
+        		magnitudes = mf.getMagnitudes(this);
+        	}
+        	return magnitudes;
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.msd;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
 
 public interface AudioProcessableFile 
 {
@@ -29,12 +30,9 @@ public interface AudioProcessableFile
    * @return String : The short name of the file corresponding to this
    */
   String getFileShortName();
-
   boolean isValidFile();
-  
   double getDuration();
-  
   long getFrameRate();
-  
   FileInputStream getFileInputStream();
+  ArrayList<Double> getMagnitudes();
 }
