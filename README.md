@@ -1,5 +1,4 @@
-ManagingSoftwareDevelopment
-===========================
+
 ********************************************************************************
 
 Team Details
@@ -35,8 +34,7 @@ d) Command of any of the following forms can be executed:
 
 e) ”-f” and "-d" should remain as it is in the command, 
     where <pathname> is a Linux path name. 
-  ----------------------------------------------------
-  
+
 Third-Party Softwares
 a) lame (www.mp3dev.org) : To convert files from .mp3 format to .wav format
 
