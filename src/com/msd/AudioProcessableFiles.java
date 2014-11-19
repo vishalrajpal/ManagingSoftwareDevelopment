@@ -334,14 +334,62 @@ public abstract class AudioProcessableFiles
          */
         public void compare(AudioProcessableFile fileToCmp) 
         {
-        	int longestMatchSubSequenceLength = Utilities.longestCommonSubLen(getMagnitudes(), fileToCmp.getMagnitudes());
     		if(Utilities.DEBUG_MODE_ON)
     		{
     			Utilities.printMagnitudeLog(getMagnitudes(), fileToCmp.getMagnitudes());
-    			System.out.println(longestMatchSubSequenceLength);
     		}
-    		if(longestMatchSubSequenceLength>Utilities.binThreshholdMatch)
-    			Utilities.printMatchAndExit(getFileShortName(), fileToCmp.getFileShortName());
+    		compareLongestSubString(getMagnitudes(), fileToCmp.getMagnitudes(), fileToCmp);
+        }
+        
+        private void compareLongestSubString(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2, AudioProcessableFile fileToCmp)
+        {
+        	int lenOfStr1 = magnitudes1.size();
+    		int lenOfStr2 = magnitudes2.size();
+    		int arraysize = Math.max(lenOfStr1, lenOfStr2);
+    		int[] prevRow = new int[arraysize+1];
+    		int[] currRow = new int[arraysize+1];
+    		
+    		float epsilon = 0.05f;
+    		int longestSubStringLength = 0;
+    		int beginIndex1 = -1;
+    		int beginIndex2 = -1;
+    		
+    		for(int i = 1; i <= lenOfStr1; i++)
+    		{
+    			double list1CurrentMag = magnitudes1.get(i-1);
+    			for(int j = 1; j <= lenOfStr2; j++)
+    			{
+    				if(Math.abs(list1CurrentMag - magnitudes2.get(j-1))<epsilon)
+    				{
+    					int curVal = 1 + prevRow[j-1];
+    					currRow[j] = curVal;
+    					if(curVal>longestSubStringLength)
+    					{
+    						longestSubStringLength = curVal;
+    						beginIndex1 = i - longestSubStringLength;
+    						beginIndex2 = j - longestSubStringLength;
+    					}
+    				}
+    				else 
+    				{
+    					currRow[j] = 0;
+    				}
+    			}
+    			System.arraycopy(currRow, 0, prevRow, 0, arraysize+1);
+    		}
+    		
+    		if(Utilities.DEBUG_MODE_ON)
+    		{
+    			System.out.println("Common Length"+longestSubStringLength);
+    			System.out.println("Begin Index1:"+beginIndex1);
+    			System.out.println("Begin Index2:"+beginIndex2);
+    		}
+    		int noOfUniqueSamplesInOneBin = (int)(Utilities.BIN_SIZE * (1 - Utilities.OVERLAP_RATIO));
+    		float firstOffset = (beginIndex1*noOfUniqueSamplesInOneBin)/(float)WAVE_SAMPLING_RATE_44100;
+    		float secondOffset = (beginIndex2*noOfUniqueSamplesInOneBin)/(float)WAVE_SAMPLING_RATE_44100;
+    		if(longestSubStringLength>Utilities.BIN_MATCH_COUNT)
+    			Utilities.printMatchAndExit(getFileShortName(), fileToCmp.getFileShortName(),firstOffset, secondOffset);
+		
         }
         
         public double getDuration()

@@ -9,27 +9,29 @@ import java.util.ArrayList;
 
 public abstract class Utilities 
 {
-	static boolean DEBUG_MODE_ON = false;
-	static int binThreshholdMatch = 350;
-    /**
-     * getLittleEndian : byte[], int, int -> long
-     * 
-     * @param arr
-     *            : The array of type byte, the values of which will be
-     *            converted to little endian
-     * @param offset
-     *            : The offset from where to start in 'arr'
-     * @param numOfBytes
-     *            : The number of indexes to convert
-     * @return val : The little endian value of the values in the arr starting
-     *         from 'offset' and ending at 'numOfBytes' from 'offset'
-     */
-    static long getLittleEndian(byte[] arr, int offset, int numOfBytes) 
-    {
-        numOfBytes--;
-        int endIndex = offset + numOfBytes;
-        long val = 0;
-        if (endIndex > arr.length)
+   static final boolean DEBUG_MODE_ON = false;
+   static final int BIN_MATCH_COUNT = 435;
+   static final double OVERLAP_RATIO = 31.0/32.0;
+   static final int BIN_SIZE = 16384;
+   /**
+    * getLittleEndian : byte[], int, int -> long
+    * 
+    * @param arr
+    *            : The array of type byte, the values of which will be
+    *            converted to little endian
+    * @param offset
+    *            : The offset from where to start in 'arr'
+    * @param numOfBytes
+    *            : The number of indexes to convert
+    * @return val : The little endian value of the values in the arr starting
+    *         from 'offset' and ending at 'numOfBytes' from 'offset'
+    */
+   static long getLittleEndian(byte[] arr, int offset, int numOfBytes) 
+   {
+      numOfBytes--;
+      int endIndex = offset + numOfBytes;
+      long val = 0;
+      if (endIndex > arr.length)
             return val;
 
         val = arr[endIndex] & 0xFF;
@@ -39,9 +41,10 @@ public abstract class Utilities
         return val;
     }
     
-    static void printMatchAndExit(String fileName1, String fileName2) 
+    static void printMatchAndExit(String fileName1, String fileName2, double firstOffset, double secondOffset) 
     {
-        System.out.println("MATCH " + fileName1 + " " + fileName2);
+        System.out.printf("MATCH " + fileName1 + " " + fileName2);
+        System.out.printf(" %.2f %.2f%n", firstOffset, secondOffset);
     }
 	
     static void printNoMatchAndExit(String fileName1, String fileName2) 
@@ -49,13 +52,16 @@ public abstract class Utilities
         System.out.println("NO MATCH " + fileName1 + " " + fileName2);
     }
     
-    static int longestCommonSubLen(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2)
+    static int longestCommonSubLen(ArrayList<Double> magnitudes1, ArrayList<Double> magnitudes2, Integer beginIndex1)
 	{
-		int longestCommonLength = 0;
 		int lenOfStr1 = magnitudes1.size();
 		int lenOfStr2 = magnitudes2.size();
 		int[][] opt = new int[lenOfStr1 + 1][lenOfStr2 + 1]; 
-		float epsilon = 0.0009f;
+		float epsilon = 0.009f;
+		int longestSubStringLength = 0;
+		//int beginIndex1 = -1;
+		int beginIndex2 = -1;
+		
 		for(int i = 1; i <= lenOfStr1; i++)
 		{
 			double list1CurrentMag = magnitudes1.get(i-1);
@@ -64,16 +70,22 @@ public abstract class Utilities
 				if(Math.abs(list1CurrentMag - magnitudes2.get(j-1))<epsilon)
 				{
 					opt[i][j] = 1 + opt[i-1][j-1];
+					if(opt[i][j]>longestSubStringLength)
+					{						
+						longestSubStringLength = opt[i][j];
+						beginIndex1 = i - longestSubStringLength;
+						beginIndex2 = j - longestSubStringLength;
+					}
 				}
 				else 
 				{
-					opt[i][j] = Math.max(opt[i-1][j], opt[i][j-1]);
+					opt[i][j] = 0;
 				}
 			}
-		}
 			
-		longestCommonLength = opt[lenOfStr1][lenOfStr2];		
-		return longestCommonLength;
+		}
+		System.out.println(beginIndex1+"From Util");			
+		return longestSubStringLength;
 	}
     
     

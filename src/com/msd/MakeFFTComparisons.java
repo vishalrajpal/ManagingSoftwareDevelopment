@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.rmi.CORBA.Util;
+
 public class MakeFFTComparisons 
 {
 	private double max_magnitude;
-	private static final double OVERLAP_RATIO = 31.0/32.0;
+	
 	private static double[] cos = null;
 	private static double[] sin = null;
 	int n, m;
@@ -29,40 +31,20 @@ public class MakeFFTComparisons
 		}
 	}
 	
-	
-	
-	public boolean compare(AudioProcessableFile a1, AudioProcessableFile a2)
-	{
-		boolean filesMatch = false;
-		ArrayList<Double> magnitudes1 = getMagnitudes(a1);
-		ArrayList<Double> magnitudes2 = getMagnitudes(a2);
-		
-		int longestMatchSubSequenceLength = Utilities.longestCommonSubLen(magnitudes1, magnitudes2);
-		if(Utilities.DEBUG_MODE_ON)
-		{
-			Utilities.printMagnitudeLog(magnitudes1, magnitudes2);
-			System.out.println(longestMatchSubSequenceLength);
-		}
-		if(longestMatchSubSequenceLength>Utilities.binThreshholdMatch)
-			filesMatch = true;
-		return filesMatch;
-	}
-	
 	public ArrayList<Double> getMagnitudes(AudioProcessableFile a1)
 	{
 		long frameRate = a1.getFrameRate();
-		int numberOfSamplesInWindow = 16384;//(int) Math.ceil((0.0116 * frameRateFile1));
-		int numberOfSamplesToIncr = (int)(numberOfSamplesInWindow * (1 - OVERLAP_RATIO));
+		int numberOfSamplesToIncr = (int)(Utilities.BIN_SIZE * (1 - Utilities.OVERLAP_RATIO));
 		int beginSample = 0;
-		int endSample = beginSample + numberOfSamplesInWindow;
+		int endSample = beginSample + Utilities.BIN_SIZE;
 		int noOfSamplesInFile1 = (int) (a1.getDuration() * frameRate);
 		FileInputStream audioStreamFile1 = a1.getFileInputStream();
 		ArrayList<Double> magnitudes = new ArrayList<Double>();
 		ArrayList<Double> fileSamples = new ArrayList<Double>();
 		do
 		{
-			readSamples(audioStreamFile1, fileSamples, 16384);
-			getLimitedFFTSamples(fileSamples, numberOfSamplesInWindow, beginSample, endSample, magnitudes);
+			readSamples(audioStreamFile1, fileSamples, Utilities.BIN_SIZE);
+			getLimitedFFTSamples(fileSamples, magnitudes);
 			beginSample+=numberOfSamplesToIncr;
 			endSample+=numberOfSamplesToIncr;
 			fileSamples.subList(0, numberOfSamplesToIncr).clear();
@@ -72,7 +54,7 @@ public class MakeFFTComparisons
 		if((noOfSamplesInFile1-beginSample)>0)
 		{
 			readSamples(audioStreamFile1, fileSamples, (noOfSamplesInFile1-beginSample));
-			getLimitedFFTSamples(fileSamples, numberOfSamplesInWindow, beginSample, noOfSamplesInFile1, magnitudes);
+			getLimitedFFTSamples(fileSamples, magnitudes);
 		}
 		return magnitudes;
 	}
@@ -95,7 +77,7 @@ public class MakeFFTComparisons
 		}
 	}
 	
-	public void getLimitedFFTSamples(ArrayList<Double> samples, int numberOfSamples, int beginSample, int endSample, ArrayList<Double> magnitudes)
+	public void getLimitedFFTSamples(ArrayList<Double> samples, ArrayList<Double> magnitudes)
 	{
 		max_magnitude = 0;
 		double[] windowedSamples= applyHanningWindow(samples);
