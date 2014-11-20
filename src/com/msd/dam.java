@@ -10,10 +10,10 @@ public class dam
     *         else prints message through standard error and exits with 
     *         status other than 0
     */
-  public static void main(String[] args)
-  {
-     String pattern = "-f|-d <pathname> -f|-d <pathname>";
-     CommandLineArgsParser.validateCommand(args, pattern);
-     CompareFiles generateComparisons = new CompareFiles(args);
-  }
+   public static void main(String[] args)
+   {
+      String pattern = "-f|-d <pathname> -f|-d <pathname>";
+      CommandLineArgsParser.validateCommand(args, pattern);
+      CompareFiles generateComparisons = new CompareFiles(args);
+   }
 }

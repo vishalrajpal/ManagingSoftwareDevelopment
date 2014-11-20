@@ -11,34 +11,36 @@ b) Priyanka Nahar            nahar.pr@husky.neu.edu
 c) Vishal Rajpal             rajpal.vi@husky.neu.edu
 
 
-
 Steps to compile and run the prototype on CCIS Linux Machine
 -------------------------------------------------------------
-a) As the files are in .tgz format. The command to unpack the files would be:
-    tar zxvf Assignment7.tgz
+a) After Extracting Assignment-7.tgz, the directory structure should be as
+   follows:
+   
+   Assignment-7
+     source
+     classes
+     dam
+     README.txt
 
-b) Locate “dam” in the extracted directory (Assignment7) through command
-   line.
+b) Locate Assignment-7 through shell
 
-c) The commands can be of the following formats:
-   -f <pathname> -f <pathname>
-   -d <pathname> -d <pathname>
-   -f <pathname> -d <pathname>
-   -d <pathname> -f <pathname>
+c) Further ./dam command can be executed with instructions below
 
-d) Command of any of the following forms can be executed:
-    ./dam -f <pathname> -f <pathname>
-    ./dam -d <pathname> -d <pathname>
-    ./dam -f <pathname> -d <pathname>
-    ./dam -d <pathname> -f <pathname>
+d) The commands can be of the following formats:
+   ./dam -f <pathname> -f <pathname>
+   ./dam -d <pathname> -d <pathname>
+   ./dam -f <pathname> -d <pathname>
+   ./dam -d <pathname> -f <pathname>
 
-e) ”-f” and "-d" should remain as it is in the command, 
-    where <pathname> is a Linux path name. 
+e) ”-f” : indicates that the <pathname> following it will be a Linux pathname
+          for a File.
+   "-d" : indicates that the <pathname> following it will be a Linux pathname
+          for a Directory
 
 Third-Party Softwares
 a) lame (www.mp3dev.org) : To convert files from .mp3 format to .wav format
-
-b) Java implementations of the FFT 
+b) wav : wav converter to change the bit rate of the files to 16 bytes per 
+         sample
+c) Java implementations of the FFT 
 (www.ee.columbia.edu/~ronw/code/MEAPsoft/doc/html/FFT_8java-source.html)
 Authorized by Professor William D. Clinger on 10/15/14.
-

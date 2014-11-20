@@ -8,24 +8,43 @@ import java.util.ArrayList;
 
 public abstract class AudioProcessableFiles
 {
-   protected final static String WAV_CONVERTER_PATH = 
-         "/course/cs5500f14/bin/wav";
-   protected final static String LAME_CONVERTER_PATH = "/usr/local/bin/lame";
-
+   private final static String WAV_CONVERTER_PATH = 
+		   "/course/cs5500f14/bin/wav";
+   private final static String LAME_CONVERTER_PATH = 
+		   "/usr/local/bin/lame";
+   /**
+    * make : File, String -> AudioProcessableFile
+    * @param fileToProcess : The File to process and this File will be ready
+    * for comparison
+    * @param tmpDirPath : The temperory directory path if needed to modify 
+    * this file though eith wav or lame converter
+    * @return AudioProcessableFile : The AudioProcessableFile represting the 
+    * given File
+    */
    public static AudioProcessableFile make(File fileToProcess,
          String tmpDirPath)
    {
       if (fileToProcess != null)
       {
          return getAudioProcessableFile(fileToProcess, tmpDirPath);
-      } else
+      } 
+      else
       {
          String exString = "Passed Invalid File Path.";
          AssertTests.assertTrue(exString, false);
          return null;
       }
    }
-
+   
+   /**
+    * getAudioProcessableFile : File, String -> AudioProcessableFile
+    * @param fileToProcess : The File to process and this File will be ready
+    * for comparison
+    * @param tmpDirPath : The temperory directory path if needed to modify 
+    * this file though eith wav or lame converter
+    * @return AudioProcessableFile : The AudioProcessableFile represting the 
+    * given File
+    */
    public static AudioProcessableFile getAudioProcessableFile(
          File fileToProcess, String tmpDirPath)
    {
@@ -37,25 +56,35 @@ public abstract class AudioProcessableFiles
       {
          processableFile = new WAVAudioProcessableFile(fileToProcess,
                tmpDirPath, fileToProcess.getName());
-      } else if (modFilePath.endsWith(".mp3"))
+      } 
+      else if (modFilePath.endsWith(".mp3"))
       {
          File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
                fileToProcess.getName());
-      } else
+      } 
+      else
       {
          String exString = "File Format not found : " + filePath;
          AssertTests.assertTrue(exString, false);
       }
 
-      if (processableFile != null)
+      if (processableFile != null && processableFile.isValidFile())
       {
          fileToReturn = processableFile;
       }
       return fileToReturn;
    }
 
-   public static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
+   /**
+    * convertMP3ToWAVFile : File, String -> File
+    * @param mp3File : The mp3File which is to be converted
+    * @param tmpDirPath : The temperory directory path in which the temperory
+    * file will be created
+    * @return File : The temperory File after converting the given original
+    * File 
+    */
+   static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
    {
       String updatedFilePath = tmpDirPath + mp3File.getName();
       Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample", "44.1",
@@ -87,20 +116,25 @@ public abstract class AudioProcessableFiles
       /* @see AudioProcessableFiles.AudioProcessableBase#getFileShortName() */
       public abstract String getFileShortName();
 
+      /* @see AudioProcessableFile#getDuration() */
       public abstract double getDuration();
 
+      /* @see AudioProcessableFile#getMagnitudes() */
       public abstract ArrayList<Double> getMagnitudes();
 
+      /* @see AudioProcessableFile#isValidFile() */      
       public boolean isValidFile()
       {
          return isValidFile;
       }
 
+      /* @see AudioProcessableFile#getFrameRate() */
       public long getFrameRate()
       {
          return sampleRate;
       }
 
+      /* @see AudioProcessableFile#getFrameRate() */
       public FileInputStream getFileInputStream()
       {
          return audioFileInputStream;
@@ -118,13 +152,13 @@ public abstract class AudioProcessableFiles
          try
          {
             audioFileInputStream = new FileInputStream(audioFile);
-         } catch (FileNotFoundException e)
+         } 
+         catch (FileNotFoundException e)
          {
             AssertTests.assertTrue(fileName + " File not found", false);
             isValidFile = false;
          }
       }
-
    }
 
    /** Create new AudioProcessableFile */
@@ -179,6 +213,12 @@ public abstract class AudioProcessableFiles
          validateFile();
       }
 
+      /**
+       * updateFile : -> void
+       * 
+       * @effect: Upddates the FileInputStream for the File represented by this
+       * to tmpFile after lame/wav conversion
+       */
       private void updateFile()
       {
          this.audioFile = new File(tmpFilePath);
@@ -324,7 +364,8 @@ public abstract class AudioProcessableFiles
             if (toChangeBitWidth || toConvertToMonoOrResample)
                updateFile();
 
-         } catch (IOException e)
+         } 
+         catch (IOException e)
          {
             AssertTests.assertTrue(fileName + " Invalid File Header", false);
             return false;
@@ -332,19 +373,10 @@ public abstract class AudioProcessableFiles
          return true;
       }
 
-      /* @see AudioProcessableFiles.AudioProcessableBase#getFileShortName() */
-      public String getFileShortName()
-      {
-         return fileName;
-      }
-
-      /*
-       * @see AudioProcessableFiles.AudioProcessableBase#compare
-       * (AudioProcessableFile)
-       */
+      /* @see AudioProcessableFiles.AudioProcessableBase#compare */
       public void compare(AudioProcessableFile fileToCmp)
       {
-         if (Utilities.DEBUG_MODE_ON)
+         if(Utilities.DEBUG_MODE_ON)
          {
             Utilities.printMagnitudeLog(getMagnitudes(),
                   fileToCmp.getMagnitudes());
@@ -353,11 +385,19 @@ public abstract class AudioProcessableFiles
                fileToCmp);
       }
 
+      /* @see AudioProcessableFiles.AudioProcessableBase#getFileShortName() */
+      public String getFileShortName()
+      {
+         return fileName;
+      }
+      
+      /* @see AudioProcessableFiles.AudioProcessableBase#getDuration() */
       public double getDuration()
       {
          return duration;
       }
 
+      /* @see AudioProcessableFiles.AudioProcessableBase#getMagnitudes() */
       public ArrayList<Double> getMagnitudes()
       {
          if (magnitudes == null)
@@ -368,6 +408,16 @@ public abstract class AudioProcessableFiles
          return magnitudes;
       }
       
+      /**
+       * compareLongestSubString : -> ArrayList<Double>, ArrayList<Double>,
+       *                              AudioProcessableFile
+       * 
+       * @effect: Determines the length of longest common matching indexes,
+       * of the bin magnitudes, also determines the time of the starting bin,
+       * if the length of the longext common sequence is more than 350
+       * (5 seconds), prints MATCH. 
+       *   
+       */
       private void compareLongestSubString(ArrayList<Double> magnitudes1,
             ArrayList<Double> magnitudes2, AudioProcessableFile fileToCmp)
       {
@@ -387,7 +437,7 @@ public abstract class AudioProcessableFiles
             double list1CurrentMag = magnitudes1.get(i - 1);
             for (int j = 1; j <= lenOfStr2; j++)
             {
-               if (Math.abs(list1CurrentMag - magnitudes2.get(j - 1)) 
+               if(Math.abs(list1CurrentMag - magnitudes2.get(j - 1)) 
                      < epsilon)
                {
                   int curVal = 1 + prevRow[j - 1];
@@ -398,7 +448,8 @@ public abstract class AudioProcessableFiles
                      beginIndex1 = i - longestSubStringLength;
                      beginIndex2 = j - longestSubStringLength;
                   }
-               } else
+               } 
+               else
                {
                   currRow[j] = 0;
                }
@@ -418,9 +469,12 @@ public abstract class AudioProcessableFiles
                / (float) WAVE_SAMPLING_RATE_44100;
          float secondOffset = (beginIndex2 * noOfUniqueSamplesInOneBin)
                / (float) WAVE_SAMPLING_RATE_44100;
-         if (longestSubStringLength > Utilities.BIN_MATCH_COUNT)
+         
+         if(longestSubStringLength >= Utilities.BIN_MATCH_COUNT)
+         {
             Utilities.printMatchAndExit(getFileShortName(),
                   fileToCmp.getFileShortName(), firstOffset, secondOffset);
+         }
       }
-    }
+   }
 }

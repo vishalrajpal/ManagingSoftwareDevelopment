@@ -1,4 +1,6 @@
 package com.msd;
+
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ public class CompareFiles
    Map<String, AudioProcessableFile> filesProcessedPath2;
    private final String TEMP_DIR_1_PATH = "/tmp/TempDir1";
    private final String TEMP_DIR_2_PATH = "/tmp/TempDir2";
+   
    /**
 	* CompareFiles: String[] -> void
 	* @param args : the command line arguments
@@ -62,18 +65,18 @@ public class CompareFiles
 	     initArr = validateDirAndGetFiles(path);
 	  }
 	  else
-		  {
-		  try
-		  {
-		     File getFile = new File(path);
-		     initArr[0] = getFile;
-		  }
-		  catch(Exception e)
-		  {
-		     String exString = "Invalid File Path : "+ arg;
-		     AssertTests.assertTrue(exString, false);
-		  }
-		  }
+      {
+	     try
+         {
+		    File getFile = new File(path);
+		    initArr[0] = getFile;
+		 }
+		 catch(Exception e)
+		 {
+		    String exString = "Invalid File Path : "+ arg;
+		    AssertTests.assertTrue(exString, false);
+         }
+      }
 	  return initArr;
    }
 	  
@@ -98,12 +101,13 @@ public class CompareFiles
 	     listOfFiles = dirOfFiles.listFiles();
 	  }
 	  else
-		  {
-		     AssertTests.assertTrue(path+":Invalid Directory", false,true);
-			 return null;
-		  }
+      {
+         AssertTests.assertTrue(path+":Invalid Directory", false,true);
+		 return null;
+      }
 	  return listOfFiles;
    }	  
+   
    /**
 	* compareAllFiles: File[] File[] -> void
 	* @param: firstPathNameFiles, files corresponding to the first pathname 
@@ -160,7 +164,7 @@ public class CompareFiles
 	* @return: AudioProcessibleFile of the given file, also the file 
 	* is added to the HashMap.
 	*/
-   private AudioProcessableFile getDirOneProcessableFile
+   private AudioProcessableFile getDirOneProcessableFile 
    (File fileToProcess, String tmpDirPath)
    {
       AudioProcessableFile f = 
