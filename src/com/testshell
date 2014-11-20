@@ -1,0 +1,5 @@
+APPLICATION_NAME=dam
+MAIN_CLASS_NAME=“dam.java”
+javac msd/*.java
+java dam $1 $2 $3 $4
+exit 0

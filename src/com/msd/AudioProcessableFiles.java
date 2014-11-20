@@ -353,6 +353,21 @@ public abstract class AudioProcessableFiles
                fileToCmp);
       }
 
+      public double getDuration()
+      {
+         return duration;
+      }
+
+      public ArrayList<Double> getMagnitudes()
+      {
+         if (magnitudes == null)
+         {
+            MakeFFTComparisons mf = new MakeFFTComparisons();
+            magnitudes = mf.getMagnitudes(this);
+         }
+         return magnitudes;
+      }
+      
       private void compareLongestSubString(ArrayList<Double> magnitudes1,
             ArrayList<Double> magnitudes2, AudioProcessableFile fileToCmp)
       {
@@ -406,22 +421,6 @@ public abstract class AudioProcessableFiles
          if (longestSubStringLength > Utilities.BIN_MATCH_COUNT)
             Utilities.printMatchAndExit(getFileShortName(),
                   fileToCmp.getFileShortName(), firstOffset, secondOffset);
-
       }
-
-      public double getDuration()
-      {
-         return duration;
-      }
-
-      public ArrayList<Double> getMagnitudes()
-      {
-         if (magnitudes == null)
-         {
-            MakeFFTComparisons mf = new MakeFFTComparisons();
-            magnitudes = mf.getMagnitudes(this);
-         }
-         return magnitudes;
-      }
-   }
+    }
 }
