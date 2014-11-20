@@ -34,7 +34,8 @@ public class MakeFFTComparisons
    public ArrayList<Double> getMagnitudes(AudioProcessableFile a1)
    {
       long frameRate = a1.getFrameRate();
-      int numberOfSamplesToIncr = (int) (Utilities.BIN_SIZE * (1 - Utilities.OVERLAP_RATIO));
+      int numberOfSamplesToIncr = (int) (Utilities.BIN_SIZE *
+            (1 - Utilities.OVERLAP_RATIO));
       int beginSample = 0;
       int endSample = beginSample + Utilities.BIN_SIZE;
       int noOfSamplesInFile1 = (int) (a1.getDuration() * frameRate);
@@ -86,7 +87,8 @@ public class MakeFFTComparisons
       int nearestPowerOfTwo = getNearestPowerOfTwo(windowedSamples.length);
       if (samples.size() != nearestPowerOfTwo)
       {
-         windowedSamples = padArrayWithZeros(windowedSamples, nearestPowerOfTwo);
+         windowedSamples = padArrayWithZeros(windowedSamples, 
+               nearestPowerOfTwo);
       }
       computeCosSinTables(windowedSamples.length);
       this.n = windowedSamples.length;
