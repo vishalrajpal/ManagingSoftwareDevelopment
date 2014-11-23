@@ -12,6 +12,7 @@ public abstract class AudioProcessableFiles
 		   "/course/cs5500f14/bin/wav";
    private final static String LAME_CONVERTER_PATH = 
 		   "/usr/local/bin/lame";
+   private final static String OGG_CONVERTER_PATH = "oggdec";
    /**
     * make : File, String -> AudioProcessableFile
     * @param fileToProcess : The File to process and this File will be ready
@@ -63,6 +64,13 @@ public abstract class AudioProcessableFiles
          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
                fileToProcess.getName());
       } 
+      else if (modFilePath.endsWith(".ogg"))
+      {
+    	  File wavFile = convertOGGToWAVFile(fileToProcess, tmpDirPath);
+    	  processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
+    			  fileToProcess.getName());
+      }
+    		
       else
       {
          String exString = "File Format not found : " + filePath;
@@ -93,6 +101,14 @@ public abstract class AudioProcessableFiles
       Utilities.executeCommand(LAME_CONVERTER_PATH, "--decode",
             updatedFilePath, newFilePath);
       return new File(newFilePath);
+   }
+   
+   static File convertOGGToWAVFile(File oggFile, String tmpDirPath)
+   {
+	   String newFilePath = tmpDirPath + oggFile.getName() + ".wav";
+	   Utilities.executeCommand(OGG_CONVERTER_PATH, oggFile.getPath(), "-b", 
+			   "8", "-o", newFilePath);
+	   return new File(newFilePath);
    }
 
    /** Implementation of AudioProcessableFile ADT */
