@@ -43,6 +43,17 @@ public abstract class Utilities
       return val;
    }
 
+   /**
+    * printMatchAndExit : String String double double -> void
+    * 
+    * @param fileName1 : The file name of the first compared file
+    * @param fileName2 : The file name of the second compared file
+    *          
+    * @param firstOffset : The starting offset in first file in seconds
+    * @param secondOffset : The starting offset in second file in seconds
+    * @effect : Prints MATCH with filenames and their offsets in time of the
+    * matching audio to Standard output
+    */
    static void printMatchAndExit(String fileName1, String fileName2,
          double firstOffset, double secondOffset)
    {
@@ -51,11 +62,13 @@ public abstract class Utilities
             Math.round(secondOffset * 10) / 10.0);
    }
 
-   static void printNoMatchAndExit(String fileName1, String fileName2)
-   {
-      System.out.println("NO MATCH " + fileName1 + " " + fileName2);
-   }
-
+   /**
+    * executeCommand : String... -> void
+    * 
+    * @param commandAndArgs : The command to be executed for a process
+    * 
+    * @effect : Executes a new process with 'commandArgs' as its parameter/s
+    */
    static void executeCommand(String... commandAndArgs)
    {
       ProcessBuilder pb = new ProcessBuilder(commandAndArgs);
@@ -69,26 +82,36 @@ public abstract class Utilities
          {
             while ((rd = reader.readLine()) != null)
             {
-               // System.out.println(rd);
+               System.out.println(rd);
             }
-         } else
+         } 
+         else
          {
-            while ((rd = reader.readLine()) != null)
-            {
-            }
-            ;
+            while ((rd = reader.readLine()) != null){};
          }
          p.waitFor();
          p.destroy();
-      } catch (IOException e)
+      } 
+      catch (IOException e)
       {
          AssertTests.assertTrue("Unable to execute lame/wav: ", false);
-      } catch (InterruptedException e)
+      } 
+      catch (InterruptedException e)
       {
          AssertTests.assertTrue("Unable to execute lame/wav", false);
       }
    }
 
+   /**
+    * printMagnitudeLog : ArrayList<Double> ArrayList<Double> -> void
+    * 
+    * @param magnitudes1 : The ArrayList containing peaks of magnitude bins 
+    * for first file
+    * @param magnitudes2 : The ArrayList containing peaks of magnitude bins
+    * for second file
+    * 
+    * @effect : Prints the magnitudes to a 'log.txt' file, used for debugging
+    */
    static void printMagnitudeLog(ArrayList<Double> magnitudes1,
          ArrayList<Double> magnitudes2)
    {
@@ -116,7 +139,8 @@ public abstract class Utilities
          }
          outputWriter.flush();
          outputWriter.close();
-      } catch (IOException e)
+      } 
+      catch (IOException e)
       {
          e.printStackTrace();
       }
