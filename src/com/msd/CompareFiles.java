@@ -27,13 +27,14 @@ public class CompareFiles
    private final String TEMP_DIR_1_PATH = "/tmp/TempDir1";
    private final String TEMP_DIR_2_PATH = "/tmp/TempDir2";
    
+   
    /**
 	* CompareFiles: String[] -> void
 	* @param args : the command line arguments
 	* @effect: Processes the path provided in the command line, if valid and
 	* prints the appropriate message.
 	*/
-   CompareFiles(String[] args)
+   public CompareFiles(String[] args)
    {
 	  File[] firstPathFiles;
 	  File[] secondPathFiles;

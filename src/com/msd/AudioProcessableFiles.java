@@ -10,8 +10,8 @@ public abstract class AudioProcessableFiles
 {
    private final static String WAV_CONVERTER_PATH = 
 		   "/course/cs5500f14/bin/wav";
-   private final static String LAME_CONVERTER_PATH = 
-		   "/usr/local/bin/lame";
+   private final static String LAME_CONVERTER_PATH = "/usr/local/bin/lame";
+		   //"/course/cs5500f14/bin/lame";
    private final static String OGG_CONVERTER_PATH = "/usr/local/bin/oggdec";
    /**
     * make : File, String -> AudioProcessableFile
@@ -60,6 +60,9 @@ public abstract class AudioProcessableFiles
       } 
       else if (modFilePath.endsWith(".mp3"))
       {
+    	  /*File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
+          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
+                fileToProcess.getName());*/
     	 processableFile = new MP3AudioProcessableFile(fileToProcess, tmpDirPath);
     	 if(processableFile.isValidFile())
     	 {
@@ -68,6 +71,9 @@ public abstract class AudioProcessableFiles
       } 
       else if (modFilePath.endsWith(".ogg"))
       {
+/*    	  File wavFile = convertOGGToWAVFile(fileToProcess, tmpDirPath);
+          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
+                fileToProcess.getName());*/
     	  processableFile = new OGGAudioProcessableFile(fileToProcess, tmpDirPath);
      	 if(processableFile.isValidFile())
      	 {
@@ -86,6 +92,26 @@ public abstract class AudioProcessableFiles
          fileToReturn = processableFile;
       }
       return fileToReturn;
+   }
+   
+   
+   static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
+   {
+      String updatedFilePath = tmpDirPath + mp3File.getName();
+      Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample", "44.1",
+            mp3File.getPath(), updatedFilePath);
+      String newFilePath = updatedFilePath + ".wav";
+      Utilities.executeCommand(LAME_CONVERTER_PATH, "--decode",
+            updatedFilePath, newFilePath);
+      return new File(newFilePath);
+   }
+   
+   static File convertOGGToWAVFile(File oggFile, String tmpDirPath)
+   {
+	   String newFilePath = tmpDirPath + oggFile.getName() + ".wav";
+	   Utilities.executeCommand(OGG_CONVERTER_PATH, oggFile.getPath(), "-b", 
+			   "16", "-o", newFilePath);
+	   return new File(newFilePath);
    }
 
    /** Implementation of AudioProcessableFile ADT */
