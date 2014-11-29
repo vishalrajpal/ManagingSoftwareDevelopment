@@ -60,10 +60,7 @@ public abstract class AudioProcessableFiles
       } 
       else if (modFilePath.endsWith(".mp3"))
       {
-    	  /*File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
-          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
-                fileToProcess.getName());*/
-    	 processableFile = new MP3AudioProcessableFile(fileToProcess, tmpDirPath);
+       	 processableFile = new MP3AudioProcessableFile(fileToProcess, tmpDirPath);
     	 if(processableFile.isValidFile())
     	 {
     		 processableFile = processableFile.getWAVAudioProcessableFile();
@@ -71,9 +68,6 @@ public abstract class AudioProcessableFiles
       } 
       else if (modFilePath.endsWith(".ogg"))
       {
-/*    	  File wavFile = convertOGGToWAVFile(fileToProcess, tmpDirPath);
-          processableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
-                fileToProcess.getName());*/
     	  processableFile = new OGGAudioProcessableFile(fileToProcess, tmpDirPath);
      	 if(processableFile.isValidFile())
      	 {
@@ -187,6 +181,7 @@ public abstract class AudioProcessableFiles
    {
       // Constants
       private final static int RIFF_HEXA_EQUIVALENT = 0x46464952;
+      //private final static int RIFF_HEXA_EQUIVALENT = 0x52494646;
       private final static int WAVE_HEXA_EQUIVALENT = 0x45564157;
       private final static int fmt_HEXA_EQUIVALENT = 0x20746D66;
       private final static int data_HEXA_EQUIVALENT = 0x61746164;
@@ -507,11 +502,16 @@ public abstract class AudioProcessableFiles
    {
 	   private final static int VERSION_1 = 0x08;
 	   private final static int LAYER_3 = 0x02;
+	   private final static int ID3 = 0x334449;
+	   private final static int VERSION_MASK = 0x000800;
+	   private final static int LAYER_MASK = 0x000200;
 	   private AudioProcessableFile wavProcessableFile = null;
 	   
 	   MP3AudioProcessableFile(File fileToProcess, String tmpDirPath)
 	   {
 		   this.audioFile = fileToProcess;
+		   this.fileName = fileToProcess.getName();
+		   this.filePath = fileToProcess.getPath();
 		   fetchFileIntoFileInputStream();
 		   validateFile();
 		   if(isValidFile)
@@ -526,22 +526,35 @@ public abstract class AudioProcessableFiles
 	public void validateFile() {
 		if (!isValidFile())
             return;	
-		byte[] arrayFor1Bytes = new byte[1];
+		byte[] arrayFor3Bytes = new byte[3];
+		byte[] arrayFor4Bytes = new byte[4];
         try
         {
-           audioFileInputStream.skip(1);
-           audioFileInputStream.read(arrayFor1Bytes);
-           int nextByte = (int) Utilities.getLittleEndian(arrayFor1Bytes, 0, 1);
-           String versionError = "MP3 file should be version 1";
-           isValidFile = AssertTests.assertTrue(versionError,
-        		   (nextByte & 0x08) == VERSION_1);
+        	audioFileInputStream.read(arrayFor3Bytes);
+        	int nextByte = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+        	if(nextByte == ID3)
+        	{
+        		audioFileInputStream.skip(3);
+            	audioFileInputStream.read(arrayFor4Bytes);
+            	nextByte = (int) Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
+            	
+            	byte ignoreMSBMask = (byte)0x7F;
+            	long size = Utilities.convertBytesToLong(arrayFor4Bytes, 7, ignoreMSBMask);
+            	audioFileInputStream.skip(size);
+            	audioFileInputStream.read(arrayFor3Bytes);
+            	nextByte = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+        	}
+        
+        	String versionError = "MP3 file should be version 1";
+        	isValidFile = AssertTests.assertTrue(versionError,
+        			((nextByte & VERSION_MASK) >> 8) == VERSION_1);
         
            if(!isValidFile)
         	   return;
            
            String layerError = "MP3 file should be Layer 3";
            isValidFile = AssertTests.assertTrue(layerError, 
-        		   (nextByte & 0x02) == LAYER_3);
+        		   ((nextByte & LAYER_MASK) >> 8)== LAYER_3);
         }
         catch (IOException e)
         {
@@ -608,6 +621,8 @@ public abstract class AudioProcessableFiles
 	   OGGAudioProcessableFile(File fileToProcess, String tmpDirPath)
 	   {
 		   this.audioFile = fileToProcess;
+		   this.fileName = fileToProcess.getName();
+		   this.filePath = fileToProcess.getPath();
 		   fetchFileIntoFileInputStream();
 		   validateFile();
 		   if(isValidFile)

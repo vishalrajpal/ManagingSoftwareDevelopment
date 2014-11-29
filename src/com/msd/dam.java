@@ -14,6 +14,5 @@ public class dam
    {
       String pattern = "-f|-d <pathname> -f|-d <pathname>";
       CommandLineArgsParser.validateCommand(args, pattern);
-      CompareFiles generateComparisons = new CompareFiles(args);
    }
 }
