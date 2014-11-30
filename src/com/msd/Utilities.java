@@ -12,12 +12,9 @@ public abstract class Utilities
    static final boolean DEBUG_MODE_ON = false;
    static final int BIN_SIZE = 16384;
    static final double OVERLAP_RATIO = 31.0 / 32.0;
-   //435 * 512 = 222720
-   //222720 / 44100 = 5.05
+   // 435 * 512 = 222720
+   // 222720 / 44100 = 5.05
    static final int BIN_MATCH_COUNT = 435;
-   
-   
-   
 
    /**
     * getLittleEndian : byte[], int, int -> long
@@ -48,26 +45,41 @@ public abstract class Utilities
       return val;
    }
 
+   /**
+    * convertBytesToLong : byte[], int, byte -> long
+    * 
+    * @param byte[] : The byte array of which the long value will be calculated
+    * @param int : The shift applied to every byte
+    * @param individualMask
+    *           : The mask applied to every byte
+    * @return long : The value of the byte array added up as long
+    * 
+    */
    static long convertBytesToLong(byte[] arr, int shift, byte individualMask)
    {
-	   	long val = 0;
-	   	int len = arr.length;
-   		for (int i = 0; i < len; i++) 
-   		{
-   			val = (val << shift) + (arr[i] & individualMask);
-   		}
-   		return val;
+      long val = 0;
+      int len = arr.length;
+      for (int i = 0; i < len; i++)
+      {
+         val = (val << shift) + (arr[i] & individualMask);
+      }
+      return val;
    }
+
    /**
     * printMatchAndExit : String String double double -> void
     * 
-    * @param fileName1 : The file name of the first compared file
-    * @param fileName2 : The file name of the second compared file
-    *          
-    * @param firstOffset : The starting offset in first file in seconds
-    * @param secondOffset : The starting offset in second file in seconds
+    * @param fileName1
+    *           : The file name of the first compared file
+    * @param fileName2
+    *           : The file name of the second compared file
+    * 
+    * @param firstOffset
+    *           : The starting offset in first file in seconds
+    * @param secondOffset
+    *           : The starting offset in second file in seconds
     * @effect : Prints MATCH with filenames and their offsets in time of the
-    * matching audio to Standard output
+    *         matching audio to Standard output
     */
    static void printMatchAndExit(String fileName1, String fileName2,
          double firstOffset, double secondOffset)
@@ -80,7 +92,8 @@ public abstract class Utilities
    /**
     * executeCommand : String... -> void
     * 
-    * @param commandAndArgs : The command to be executed for a process
+    * @param commandAndArgs
+    *           : The command to be executed for a process
     * 
     * @effect : Executes a new process with 'commandArgs' as its parameter/s
     */
@@ -90,8 +103,8 @@ public abstract class Utilities
       try
       {
          Process p = pb.start();
-         BufferedReader reader = new BufferedReader(new InputStreamReader(
-               p.getErrorStream()));
+         BufferedReader reader =
+               new BufferedReader(new InputStreamReader(p.getErrorStream()));
          String rd = null;
          if (DEBUG_MODE_ON)
          {
@@ -99,31 +112,33 @@ public abstract class Utilities
             {
                System.out.println(rd);
             }
-         } 
+         }
          else
          {
             while ((rd = reader.readLine()) != null){};
          }
          p.waitFor();
          p.destroy();
-      } 
+      }
       catch (IOException e)
       {
-         AssertTests.assertTrue("Unable to execute lame/wav: ", false);
-      } 
+         AssertTests.assertTrue("Unable to execute command", false);
+      }
       catch (InterruptedException e)
       {
-         AssertTests.assertTrue("Unable to execute lame/wav", false);
+         AssertTests.assertTrue("Unable to execute command", false);
       }
    }
 
    /**
     * printMagnitudeLog : ArrayList<Double> ArrayList<Double> -> void
     * 
-    * @param magnitudes1 : The ArrayList containing peaks of magnitude bins 
-    * for first file
-    * @param magnitudes2 : The ArrayList containing peaks of magnitude bins
-    * for second file
+    * @param magnitudes1
+    *           : The ArrayList containing peaks of magnitude bins for first
+    *           file
+    * @param magnitudes2
+    *           : The ArrayList containing peaks of magnitude bins for second
+    *           file
     * 
     * @effect : Prints the magnitudes to a 'log.txt' file, used for debugging
     */
@@ -154,7 +169,7 @@ public abstract class Utilities
          }
          outputWriter.flush();
          outputWriter.close();
-      } 
+      }
       catch (IOException e)
       {
          e.printStackTrace();

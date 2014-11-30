@@ -1,28 +1,25 @@
 package com.msd;
 
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-
-import javax.rmi.CORBA.Util;
 
 public class MakeFFTComparisons
 {
    private double max_magnitude;
 
-   //Used by FFT
+   // Used by FFT
    private static double[] cos = null;
    private static double[] sin = null;
    int n, m;
 
    /**
     * computeCosSinTables : int -> void
-    * @param n: The number of cos and sin values needed
-    * @effect: If cos and sin are not yet initialized or need to be updated
-    * they get initialized/updated else there is no change
+    * 
+    * @param n
+    *           : The number of cos and sin values needed
+    * @effect: If cos and sin are not yet initialized or need to be updated they
+    *          get initialized/updated else there is no change
     */
    private static void computeCosSinTables(int n)
    {
@@ -40,15 +37,17 @@ public class MakeFFTComparisons
 
    /**
     * getMagnitudes : AudioProcessableFile -> ArrayList<Double>
-    * @param a1: The AudioProcessableFile of which peak magnitudes are needed
+    * 
+    * @param a1
+    *           : The AudioProcessableFile of which peak magnitudes are needed
     * @return ArrayList<Double>: The peak magnitudes for AudioProcessableFile
-    * 'a1'
+    *         'a1'
     */
    ArrayList<Double> getMagnitudes(AudioProcessableFile a1)
    {
       long frameRate = a1.getFrameRate();
-      int numberOfSamplesToIncr = (int) (Utilities.BIN_SIZE *
-            (1 - Utilities.OVERLAP_RATIO));
+      int numberOfSamplesToIncr =
+            (int) (Utilities.BIN_SIZE * (1 - Utilities.OVERLAP_RATIO));
       int beginSample = 0;
       int endSample = beginSample + Utilities.BIN_SIZE;
       int noOfSamplesInFile1 = (int) (a1.getDuration() * frameRate);
@@ -62,7 +61,7 @@ public class MakeFFTComparisons
          beginSample += numberOfSamplesToIncr;
          endSample += numberOfSamplesToIncr;
          fileSamples.subList(0, numberOfSamplesToIncr).clear();
-      } 
+      }
       while (endSample < noOfSamplesInFile1);
 
       if ((noOfSamplesInFile1 - beginSample) > 0)
@@ -76,15 +75,18 @@ public class MakeFFTComparisons
 
    /**
     * readSamples : FileInputStream ArrayList<Double> int -> ArrayList<Double>
-    * @param audioFileInputStream: The FileInputStream from which samples are
-    * to be read
-    * @param samples: The size of the samples is considered as the beginning
-    * index for the newly read samples, and the new samples are read in 
-    * 'samples' further
-    * @param endSample: The end index till which the samples are read from the
-    * 'audioFileInputStream'
-    * @effect: Updates the samples by reading samples beginning from 
-    * samples.size() till endSample
+    * 
+    * @param audioFileInputStream
+    *           : The FileInputStream from which samples are to be read
+    * @param samples
+    *           : The size of the samples is considered as the beginning index
+    *           for the newly read samples, and the new samples are read in
+    *           'samples' further
+    * @param endSample
+    *           : The end index till which the samples are read from the
+    *           'audioFileInputStream'
+    * @effect: Updates the samples by reading samples beginning from
+    *          samples.size() till endSample
     */
    private void readSamples(FileInputStream audioFileInputStream,
          ArrayList<Double> samples, int endSample)
@@ -96,7 +98,8 @@ public class MakeFFTComparisons
          try
          {
             audioFileInputStream.read(fourByteArray);
-            samples.add((double) Utilities.getLittleEndian(fourByteArray, 0, 2)
+            samples.add((double) Utilities
+                  .getLittleEndian(fourByteArray, 0, 2)
                   / toDivide);
          }
          catch (IOException e)
@@ -108,11 +111,15 @@ public class MakeFFTComparisons
 
    /**
     * getLimitedFFTSamples : ArrayList<Double> ArrayList<Double> -> void
-    * @param samples: The samples of which FFT value is to be calculated
-    * @param magnitudes: The peak magnitude of FFT values of this set of 
-    * samples will be added to magnitudes 
-    * @effect: Applies Hanning Window to 'samples' and Calculates the FFT 
-    * values for windowed samples and adds the peak of this set to 'magnitudes'
+    * 
+    * @param samples
+    *           : The samples of which FFT value is to be calculated
+    * @param magnitudes
+    *           : The peak magnitude of FFT values of this set of samples will
+    *           be added to magnitudes
+    * @effect: Applies Hanning Window to 'samples' and Calculates the FFT values
+    *          for windowed samples and adds the peak of this set to
+    *          'magnitudes'
     */
    private void getLimitedFFTSamples(ArrayList<Double> samples,
          ArrayList<Double> magnitudes)
@@ -122,8 +129,8 @@ public class MakeFFTComparisons
       int nearestPowerOfTwo = getNearestPowerOfTwo(windowedSamples.length);
       if (samples.size() != nearestPowerOfTwo)
       {
-         windowedSamples = padArrayWithZeros(windowedSamples, 
-               nearestPowerOfTwo);
+         windowedSamples =
+               padArrayWithZeros(windowedSamples, nearestPowerOfTwo);
       }
       computeCosSinTables(windowedSamples.length);
       this.n = windowedSamples.length;
@@ -135,9 +142,11 @@ public class MakeFFTComparisons
 
    /**
     * applyHanningWindow : ArrayList<Double> -> double[]
-    * @param samples: The samples to which Hanning Window is to be applied
-    * @return double[] : The 'samples' after applying the Hanning Window
-    * are returned
+    * 
+    * @param samples
+    *           : The samples to which Hanning Window is to be applied
+    * @return double[] : The 'samples' after applying the Hanning Window are
+    *         returned
     */
    private static double[] applyHanningWindow(ArrayList<Double> samples)
    {
@@ -146,9 +155,10 @@ public class MakeFFTComparisons
       for (int i = 0; i < noOfSamples; i++)
       {
          float piTimesIndex = (float) Math.PI * i;
-         double windowReal = samples.get(i)
-               * (0.5f + 0.5f * (float) Math.cos(2.0f * piTimesIndex
-                     / noOfSamples));
+         double windowReal =
+               samples.get(i)
+                     * (0.5f + 0.5f * (float) Math.cos(2.0f * piTimesIndex
+                           / noOfSamples));
          windowedSamples[i] = windowReal;
       }
       return windowedSamples;
@@ -156,8 +166,10 @@ public class MakeFFTComparisons
 
    /**
     * getNearestPowerOfTwo : int -> int
-    * @param n: The int to which the nearest power of 2 greater than 'n' is to
-    * be calculated
+    * 
+    * @param n
+    *           : The int to which the nearest power of 2 greater than 'n' is to
+    *           be calculated
     * @return int : The nearest power of 2 greater than 'n'.
     */
    private static int getNearestPowerOfTwo(int n)
@@ -173,14 +185,16 @@ public class MakeFFTComparisons
    }
 
    /**
-    * padArrayWithZeros : double[] int -> double[] 
-    * @param originalArray: The array which might not be filled till 
-    * 'nearestPowerOfTwo'
-    * @param nearestPowerOfTwo: The length of the new array to be returned
-    * which is a power of two and nearest to length of 'originalArray'
+    * padArrayWithZeros : double[] int -> double[]
+    * 
+    * @param originalArray
+    *           : The array which might not be filled till 'nearestPowerOfTwo'
+    * @param nearestPowerOfTwo
+    *           : The length of the new array to be returned which is a power of
+    *           two and nearest to length of 'originalArray'
     * @return double[] : The array with length of 'nearestPowerOfTwo' with its
-    * initial values being same as 'originalArray' and the leftover values
-    * being 0.
+    *         initial values being same as 'originalArray' and the leftover
+    *         values being 0.
     */
    private static double[] padArrayWithZeros(double[] originalArray,
          int nearestPowerOfTwo)
@@ -210,7 +224,7 @@ public class MakeFFTComparisons
    public void fft(double[] x, double[] y)
    {
       int i, j, k, n1, n2, a;
-      double c, s, e, t1, t2;
+      double c, s, t1, t2;
       // Bit-reverse
       j = 0;
       n2 = n / 2;
@@ -258,8 +272,8 @@ public class MakeFFTComparisons
                x[k] = x[k] + t1;
                y[k] = y[k] + t2;
                double mag1 = Math.sqrt(x[k] * x[k] + y[k] * y[k]);
-               double mag2 = Math.sqrt(x[k + n1] * x[k + n1] + y[k + n1]
-                     * y[k + n1]);
+               double mag2 =
+                     Math.sqrt(x[k + n1] * x[k + n1] + y[k + n1] * y[k + n1]);
                int retVal = Double.compare(mag1, max_magnitude);
                if (retVal > 0)
                   max_magnitude = mag1;

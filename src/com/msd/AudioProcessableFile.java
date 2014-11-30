@@ -8,8 +8,7 @@ public interface AudioProcessableFile
    /**
     * validateFile: -> void
     * 
-    * @effect: Validates the file to check if it is one of the supported 
-    * formats
+    * @effect: Validates the file to check if it is one of the supported formats
     */
    void validateFile();
 
@@ -18,12 +17,11 @@ public interface AudioProcessableFile
     * 
     * @param fileToCmp
     *           : The AudioProcessableFile to compare
-    * @effect: Compares this and 'fileToCmp' in two steps a) Compares the 
-    *          length of two files. If same proceeds to Step 2 b) Compares the
-    *          FFT result of both files through Mean Squared Error If MSE is
-    *          equal to 0 the files are same and a 'MATCH' message is printed
-    *          through Standard output else a 'NO MATCH' message is printed In
-    *          either case the program exits with a status of 0.
+    * @effect: Compares this and 'fileToCmp' in two steps a) Generates the
+    *          magnitudes of the samples and stores peak of every bin b)
+    *          Compares the peak magnitudes of two files through
+    *          LongestCommonSubString algorithm and MATCH is printed if the
+    *          match is equal to or more than 5 seconds (435 bins)
     */
    void compare(AudioProcessableFile fileToCmp);
 
@@ -58,18 +56,23 @@ public interface AudioProcessableFile
    /**
     * getFileInputStream : -> FileInputStream
     * 
-    * @return long : returns the FileInputStream for the File represented by 
-    * the implementation of this interface
+    * @return long : returns the FileInputStream for the File represented by the
+    *         implementation of this interface
     */
    FileInputStream getFileInputStream();
 
    /**
     * getMagnitudes : -> ArrayList<Double>
     * 
-    * @return ArrayList<Double> : returns the peak of every magnitude bin as
-    * an ArrayList
+    * @return ArrayList<Double> : returns the peak of every bin as an ArrayList
     */
    ArrayList<Double> getMagnitudes();
-   
+
+   /**
+    * getWAVAudioProcessableFile : -> AudioProcessableFile
+    * 
+    * @return AudioProcessableFile : It returns a WAV file of the canonical
+    *         format
+    */
    AudioProcessableFile getWAVAudioProcessableFile();
 }

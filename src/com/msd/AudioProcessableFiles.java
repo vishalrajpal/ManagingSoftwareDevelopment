@@ -8,19 +8,22 @@ import java.util.ArrayList;
 
 public abstract class AudioProcessableFiles
 {
-   private final static String WAV_CONVERTER_PATH = 
-		   "/course/cs5500f14/bin/wav";
-   private final static String LAME_CONVERTER_PATH = "/usr/local/bin/lame";
-		   //"/course/cs5500f14/bin/lame";
+   private final static String WAV_CONVERTER_PATH =
+         "/course/cs5500f14/bin/wav";
+   private final static String LAME_CONVERTER_PATH =
+         "/course/cs5500f14/bin/lame";
    private final static String OGG_CONVERTER_PATH = "/usr/local/bin/oggdec";
+
    /**
     * make : File, String -> AudioProcessableFile
-    * @param fileToProcess : The File to process and this File will be ready
-    * for comparison
-    * @param tmpDirPath : The temperory directory path if needed to modify 
-    * this file though eith wav or lame converter
-    * @return AudioProcessableFile : The AudioProcessableFile represting the 
-    * given File
+    * 
+    * @param fileToProcess
+    *           : The File to process and this File will be ready for comparison
+    * @param tmpDirPath
+    *           : The temperory directory path if needed to modify this file
+    *           though either wav or lame converter
+    * @return AudioProcessableFile : The AudioProcessableFile represting the
+    *         given File
     */
    public static AudioProcessableFile make(File fileToProcess,
          String tmpDirPath)
@@ -28,7 +31,7 @@ public abstract class AudioProcessableFiles
       if (fileToProcess != null)
       {
          return getAudioProcessableFile(fileToProcess, tmpDirPath);
-      } 
+      }
       else
       {
          String exString = "Passed Invalid File Path.";
@@ -36,15 +39,17 @@ public abstract class AudioProcessableFiles
          return null;
       }
    }
-   
+
    /**
     * getAudioProcessableFile : File, String -> AudioProcessableFile
-    * @param fileToProcess : The File to process and this File will be ready
-    * for comparison
-    * @param tmpDirPath : The temperory directory path if needed to modify 
-    * this file though eith wav or lame converter
-    * @return AudioProcessableFile : The AudioProcessableFile represting the 
-    * given File
+    * 
+    * @param fileToProcess
+    *           : The File to process and this File will be ready for comparison
+    * @param tmpDirPath
+    *           : The temperory directory path if needed to modify this file
+    *           though eith wav or lame converter
+    * @return AudioProcessableFile : The AudioProcessableFile represting the
+    *         given File
     */
    public static AudioProcessableFile getAudioProcessableFile(
          File fileToProcess, String tmpDirPath)
@@ -55,26 +60,28 @@ public abstract class AudioProcessableFiles
       AudioProcessableFile processableFile = null;
       if (modFilePath.endsWith(".wav"))
       {
-         processableFile = new WAVAudioProcessableFile(fileToProcess,
-               tmpDirPath, fileToProcess.getName());
-      } 
+         processableFile =
+               new WAVAudioProcessableFile(fileToProcess, tmpDirPath,
+                     fileToProcess.getName());
+      }
       else if (modFilePath.endsWith(".mp3"))
       {
-       	 processableFile = new MP3AudioProcessableFile(fileToProcess, tmpDirPath);
-    	 if(processableFile.isValidFile())
-    	 {
-    		 processableFile = processableFile.getWAVAudioProcessableFile();
-    	 }
-      } 
+         processableFile =
+               new MP3AudioProcessableFile(fileToProcess, tmpDirPath);
+         if (processableFile.isValidFile())
+         {
+            processableFile = processableFile.getWAVAudioProcessableFile();
+         }
+      }
       else if (modFilePath.endsWith(".ogg"))
       {
-    	  processableFile = new OGGAudioProcessableFile(fileToProcess, tmpDirPath);
-     	 if(processableFile.isValidFile())
-     	 {
-     		 processableFile = processableFile.getWAVAudioProcessableFile();
-     	 }
+         processableFile =
+               new OGGAudioProcessableFile(fileToProcess, tmpDirPath);
+         if (processableFile.isValidFile())
+         {
+            processableFile = processableFile.getWAVAudioProcessableFile();
+         }
       }
-    		
       else
       {
          String exString = "File Format not found : " + filePath;
@@ -87,38 +94,17 @@ public abstract class AudioProcessableFiles
       }
       return fileToReturn;
    }
-   
-   
-   static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
-   {
-      String updatedFilePath = tmpDirPath + mp3File.getName();
-      Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample", "44.1",
-            mp3File.getPath(), updatedFilePath);
-      String newFilePath = updatedFilePath + ".wav";
-      Utilities.executeCommand(LAME_CONVERTER_PATH, "--decode",
-            updatedFilePath, newFilePath);
-      return new File(newFilePath);
-   }
-   
-   static File convertOGGToWAVFile(File oggFile, String tmpDirPath)
-   {
-	   String newFilePath = tmpDirPath + oggFile.getName() + ".wav";
-	   Utilities.executeCommand(OGG_CONVERTER_PATH, oggFile.getPath(), "-b", 
-			   "16", "-o", newFilePath);
-	   return new File(newFilePath);
-   }
 
    /** Implementation of AudioProcessableFile ADT */
    private static abstract class AudioProcessableBase implements
          AudioProcessableFile
    {
-      protected boolean isValidFile = true;
-      protected float[] samples = null;
-      protected FileInputStream audioFileInputStream;
-      protected File audioFile;
-      protected String fileName;
-      protected long sampleRate;
-      protected String filePath;
+      boolean isValidFile = true;
+      FileInputStream audioFileInputStream;
+      File audioFile;
+      String fileName;
+      long sampleRate;
+      String filePath;
 
       /* @see AudioProcessableFile#validateFile() */
       public abstract void validateFile();
@@ -135,9 +121,10 @@ public abstract class AudioProcessableFiles
       /* @see AudioProcessableFile#getMagnitudes() */
       public abstract ArrayList<Double> getMagnitudes();
 
+      /* @see AudioProcessableFile#getWAVAudioProcessableFile() */
       public abstract AudioProcessableFile getWAVAudioProcessableFile();
-      
-      /* @see AudioProcessableFile#isValidFile() */      
+
+      /* @see AudioProcessableFile#isValidFile() */
       public boolean isValidFile()
       {
          return isValidFile;
@@ -162,12 +149,12 @@ public abstract class AudioProcessableFiles
        *          at 'filePath'. If file not found throws FileNotFound
        *          Exception.
        */
-      protected void fetchFileIntoFileInputStream()
+      void fetchFileIntoFileInputStream()
       {
          try
          {
             audioFileInputStream = new FileInputStream(audioFile);
-         } 
+         }
          catch (FileNotFoundException e)
          {
             AssertTests.assertTrue(fileName + " File not found", false);
@@ -181,7 +168,6 @@ public abstract class AudioProcessableFiles
    {
       // Constants
       private final static int RIFF_HEXA_EQUIVALENT = 0x46464952;
-      //private final static int RIFF_HEXA_EQUIVALENT = 0x52494646;
       private final static int WAVE_HEXA_EQUIVALENT = 0x45564157;
       private final static int fmt_HEXA_EQUIVALENT = 0x20746D66;
       private final static int data_HEXA_EQUIVALENT = 0x61746164;
@@ -198,9 +184,7 @@ public abstract class AudioProcessableFiles
       // Instance Variables
       private long fileLength;
       private int bitsPerSample;
-      private int bytesPerSample;
       private int noOfChannels;
-      private int bytesPerFrame;
       private double duration;
       private boolean toConvertToMonoOrResample = false;
       private boolean toChangeBitWidth = false;
@@ -214,8 +198,7 @@ public abstract class AudioProcessableFiles
        * @param filePath
        *           : The file path for which an AudioProcessableFile has to be
        *           created
-       * @effect : The constructor implicitly returns an instance of type 
-       * Create
+       * @effect : The constructor implicitly returns an instance of type Create
        */
       WAVAudioProcessableFile(File fileToProcess, String tmpDirPath,
             String fileName)
@@ -233,7 +216,7 @@ public abstract class AudioProcessableFiles
        * updateFile : -> void
        * 
        * @effect: Upddates the FileInputStream for the File represented by this
-       * to tmpFile after lame/wav conversion
+       *          to tmpFile after lame/wav conversion
        */
       private void updateFile()
       {
@@ -242,6 +225,14 @@ public abstract class AudioProcessableFiles
       }
 
       /* @see AudioProcessableFiles.AudioProcessableBase#validateFile() */
+      /**
+       * Header Format: Offset Name 0 'RIFF' 4 Chunk Size (Skipping) 8 'WAVE' 12
+       * 'fmt ' 16 Chunk Size (Skipping) 20 AudioFormat (Should be PCM = 1) 22
+       * Number of Channels (MONO | STEREO = 1 | 2) 24 Sample Rate (Should be
+       * 11025 | 22050 | 44100 | 48000 28 Byte Rate (Skipping) 32 Block Align
+       * (Skipping) 34 Bits per sample 36 'data' 40 Chunk Size (Size of the
+       * sound data) 44 Sound data
+       */
       public void validateFile()
       {
          if (!isValidFile)
@@ -255,8 +246,9 @@ public abstract class AudioProcessableFiles
             audioFileInputStream.read(arrayFor4Bytes);
             String riffErr = fileName + notSupportedFormatError;
             long riffLitEnd = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            isValidFile = AssertTests.assertTrue(riffErr,
-                  riffLitEnd == RIFF_HEXA_EQUIVALENT);
+            isValidFile =
+                  AssertTests.assertTrue(riffErr,
+                        riffLitEnd == RIFF_HEXA_EQUIVALENT);
             if (!isValidFile)
                return;
             // Skip the chunkSize
@@ -266,16 +258,18 @@ public abstract class AudioProcessableFiles
             audioFileInputStream.read(arrayFor4Bytes);
             String waveErr = fileName + notSupportedFormatError;
             long waveLitEnd = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            isValidFile = AssertTests.assertTrue(waveErr,
-                  waveLitEnd == WAVE_HEXA_EQUIVALENT);
+            isValidFile =
+                  AssertTests.assertTrue(waveErr,
+                        waveLitEnd == WAVE_HEXA_EQUIVALENT);
             if (!isValidFile)
                return;
             // These 4 bytes should be 'fmt '
             audioFileInputStream.read(arrayFor4Bytes);
             String fmtError = fileName + " The chunk should be type fmt";
             long fmtLitEnd = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            isValidFile = AssertTests.assertTrue(fmtError,
-                  fmtLitEnd == fmt_HEXA_EQUIVALENT);
+            isValidFile =
+                  AssertTests.assertTrue(fmtError,
+                        fmtLitEnd == fmt_HEXA_EQUIVALENT);
             if (!isValidFile)
                return;
             // Skip the chunkSize
@@ -283,36 +277,40 @@ public abstract class AudioProcessableFiles
 
             // The AudioFormat should be 1 i.e. PCM (Linear Quantization)
             audioFileInputStream.read(arrayFor2Bytes);
-            String pcmError = fileName
-                  + " The Audio Format should be of type PCM";
+            String pcmError =
+                  fileName + " The Audio Format should be of type PCM";
             long pcmLitEnd = Utilities.getLittleEndian(arrayFor2Bytes, 0, 2);
-            isValidFile = AssertTests.assertTrue(pcmError,
-                  pcmLitEnd == AUDIO_FORMAT_EQUIVALENT);
+            isValidFile =
+                  AssertTests.assertTrue(pcmError,
+                        pcmLitEnd == AUDIO_FORMAT_EQUIVALENT);
             if (!isValidFile)
                return;
             // These 2 bytes should mention number of channels & should be
             // 2(Stereo) or 1(Mono)
             audioFileInputStream.read(arrayFor2Bytes);
-            String noOfChanError = fileName
-                  + " The audio should be of type Stereo or Mono";
-            noOfChannels = (int) Utilities
-                  .getLittleEndian(arrayFor2Bytes, 0, 2);
-            isValidFile = AssertTests.assertTrue(noOfChanError,
-                  noOfChannels == STEREO_EQUIVALENT
-                        || noOfChannels == MONO_EQUIVALENT);
+            String noOfChanError =
+                  fileName + " The audio should be of type Stereo or Mono";
+            noOfChannels =
+                  (int) Utilities.getLittleEndian(arrayFor2Bytes, 0, 2);
+            isValidFile =
+                  AssertTests.assertTrue(noOfChanError,
+                        noOfChannels == STEREO_EQUIVALENT
+                              || noOfChannels == MONO_EQUIVALENT);
             if (!isValidFile)
                return;
             // The Sample rate should be 11.025kHz or 22.05kHz or 44.1kHz
             // or 48kHz
             audioFileInputStream.read(arrayFor4Bytes);
-            String samRtError = fileName + "The sampling rate should be "
-                  + "11.025 kHz or 22.05 kHz or 44.1 kHz or 48kHz";
+            String samRtError =
+                  fileName + "The sampling rate should be "
+                        + "11.025 kHz or 22.05 kHz or 44.1 kHz or 48kHz";
             sampleRate = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            isValidFile = AssertTests.assertTrue(samRtError,
-                  sampleRate == WAVE_SAMPLING_RATE_11025
-                        || sampleRate == WAVE_SAMPLING_RATE_22050
-                        || sampleRate == WAVE_SAMPLING_RATE_44100
-                        || sampleRate == WAVE_SAMPLING_RATE_48000);
+            isValidFile =
+                  AssertTests.assertTrue(samRtError,
+                        sampleRate == WAVE_SAMPLING_RATE_11025
+                              || sampleRate == WAVE_SAMPLING_RATE_22050
+                              || sampleRate == WAVE_SAMPLING_RATE_44100
+                              || sampleRate == WAVE_SAMPLING_RATE_48000);
             if (!isValidFile)
                return;
 
@@ -327,38 +325,37 @@ public abstract class AudioProcessableFiles
 
             // Bits per Sample should be 8 or 16
             audioFileInputStream.read(arrayFor2Bytes);
-            String bitError = fileName + " There should be 8 or 16 bits/sample";
-            bitsPerSample = (int) Utilities.getLittleEndian(arrayFor2Bytes, 0,
-                  2);
-            isValidFile = AssertTests
-                  .assertTrue(
-                        bitError,
-                        (bitsPerSample == BITS_PER_SAMPLE_8 || 
-                        bitsPerSample == BITS_PER_SAMPLE_16));
-            
+            String bitError =
+                  fileName + " There should be 8 or 16 bits/sample";
+            bitsPerSample =
+                  (int) Utilities.getLittleEndian(arrayFor2Bytes, 0, 2);
+            isValidFile = AssertTests.assertTrue(bitError,
+                              (bitsPerSample == BITS_PER_SAMPLE_8 || 
+                              bitsPerSample == BITS_PER_SAMPLE_16));
+
             if (!isValidFile)
                return;
-            
+
             if (bitsPerSample != BITS_PER_SAMPLE_16)
                toChangeBitWidth = true;
-            bytesPerSample = bitsPerSample / 8;
 
             // The data chunk gets started and should start with 'data' for
             // 4 bytes
             audioFileInputStream.read(arrayFor4Bytes);
-            String dataError = fileName
-                  + " There should be a proper data chunk";
+            String dataError =
+                  fileName + " There should be a proper data chunk";
             long dataLitEnd = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            isValidFile = AssertTests.assertTrue(dataError,
-                  dataLitEnd == data_HEXA_EQUIVALENT);
-            
+            isValidFile =
+                  AssertTests.assertTrue(dataError,
+                        dataLitEnd == data_HEXA_EQUIVALENT);
+
             // The next 4 bytes determine the length of the data chunk
             audioFileInputStream.read(arrayFor4Bytes);
             fileLength = Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
 
-            bytesPerFrame = bytesPerSample * noOfChannels;
-            duration = (double) fileLength
-                  / (sampleRate * noOfChannels * bitsPerSample / 8);
+            duration =
+                  (double) fileLength
+                        / (sampleRate * noOfChannels * bitsPerSample / 8);
 
             if (toChangeBitWidth)
             {
@@ -369,8 +366,8 @@ public abstract class AudioProcessableFiles
 
             if (toConvertToMonoOrResample)
             {
-               String updatedFilePath = tmpDirPath + audioFile.getName()
-                     + ".mp3";
+               String updatedFilePath =
+                     tmpDirPath + audioFile.getName() + ".mp3";
                Utilities.executeCommand(LAME_CONVERTER_PATH, "-a",
                      "--resample", "44.1", tmpFilePath, updatedFilePath);
                tmpFilePath = updatedFilePath + ".wav";
@@ -381,7 +378,7 @@ public abstract class AudioProcessableFiles
             if (toChangeBitWidth || toConvertToMonoOrResample)
                updateFile();
 
-         } 
+         }
          catch (IOException e)
          {
             AssertTests.assertTrue(fileName + " Invalid File Header", false);
@@ -392,10 +389,10 @@ public abstract class AudioProcessableFiles
       /* @see AudioProcessableFiles.AudioProcessableBase#compare */
       public void compare(AudioProcessableFile fileToCmp)
       {
-         if(Utilities.DEBUG_MODE_ON)
+         if (Utilities.DEBUG_MODE_ON)
          {
-            Utilities.printMagnitudeLog(getMagnitudes(),
-                  fileToCmp.getMagnitudes());
+            Utilities.printMagnitudeLog(getMagnitudes(), fileToCmp
+                  .getMagnitudes());
          }
          compareLongestSubString(getMagnitudes(), fileToCmp.getMagnitudes(),
                fileToCmp);
@@ -406,7 +403,7 @@ public abstract class AudioProcessableFiles
       {
          return fileName;
       }
-      
+
       /* @see AudioProcessableFiles.AudioProcessableBase#getDuration() */
       public double getDuration()
       {
@@ -423,20 +420,21 @@ public abstract class AudioProcessableFiles
          }
          return magnitudes;
       }
-      
+
       public AudioProcessableFile getWAVAudioProcessableFile()
       {
-    	  return this;
+         return this;
       }
+
       /**
        * compareLongestSubString : -> ArrayList<Double>, ArrayList<Double>,
-       *                              AudioProcessableFile
+       * AudioProcessableFile
        * 
-       * @effect: Determines the length of longest common matching indexes,
-       * of the bin magnitudes, also determines the time of the starting bin,
-       * if the length of the longext common sequence is more than 350
-       * (5 seconds), prints MATCH. 
-       *   
+       * @effect: Determines the length of longest common matching indexes, of
+       *          the bin magnitudes, also determines the time of the starting
+       *          bin, if the length of the longext common sequence is more than
+       *          435 (5 seconds), prints MATCH.
+       * 
        */
       private void compareLongestSubString(ArrayList<Double> magnitudes1,
             ArrayList<Double> magnitudes2, AudioProcessableFile fileToCmp)
@@ -457,8 +455,7 @@ public abstract class AudioProcessableFiles
             double list1CurrentMag = magnitudes1.get(i - 1);
             for (int j = 1; j <= lenOfStr2; j++)
             {
-               if(Math.abs(list1CurrentMag - magnitudes2.get(j - 1)) 
-                     < epsilon)
+               if (Math.abs(list1CurrentMag - magnitudes2.get(j - 1)) < epsilon)
                {
                   int curVal = 1 + prevRow[j - 1];
                   currRow[j] = curVal;
@@ -468,7 +465,7 @@ public abstract class AudioProcessableFiles
                      beginIndex1 = i - longestSubStringLength;
                      beginIndex2 = j - longestSubStringLength;
                   }
-               } 
+               }
                else
                {
                   currRow[j] = 0;
@@ -483,230 +480,268 @@ public abstract class AudioProcessableFiles
             System.out.println("Begin Index1:" + beginIndex1);
             System.out.println("Begin Index2:" + beginIndex2);
          }
-         int noOfUniqueSamplesInOneBin = (int) (Utilities.BIN_SIZE * 
-               (1 - Utilities.OVERLAP_RATIO));
-         float firstOffset = (beginIndex1 * noOfUniqueSamplesInOneBin)
-               / (float) WAVE_SAMPLING_RATE_44100;
-         float secondOffset = (beginIndex2 * noOfUniqueSamplesInOneBin)
-               / (float) WAVE_SAMPLING_RATE_44100;
-         
-         if(longestSubStringLength >= Utilities.BIN_MATCH_COUNT)
+         int noOfUniqueSamplesInOneBin =
+               (int) (Utilities.BIN_SIZE * (1 - Utilities.OVERLAP_RATIO));
+         float firstOffset =
+               (beginIndex1 * noOfUniqueSamplesInOneBin)
+                     / (float) WAVE_SAMPLING_RATE_44100;
+         float secondOffset =
+               (beginIndex2 * noOfUniqueSamplesInOneBin)
+                     / (float) WAVE_SAMPLING_RATE_44100;
+
+         if (longestSubStringLength >= Utilities.BIN_MATCH_COUNT)
          {
-            Utilities.printMatchAndExit(getFileShortName(),
-                  fileToCmp.getFileShortName(), firstOffset, secondOffset);
+            Utilities.printMatchAndExit(getFileShortName(), fileToCmp
+                  .getFileShortName(), firstOffset, secondOffset);
          }
       }
    }
 
    private static class MP3AudioProcessableFile extends AudioProcessableBase
    {
-	   private final static int VERSION_1 = 0x08;
-	   private final static int LAYER_3 = 0x02;
-	   private final static int ID3 = 0x334449;
-	   private final static int VERSION_MASK = 0x000800;
-	   private final static int LAYER_MASK = 0x000200;
-	   private AudioProcessableFile wavProcessableFile = null;
-	   
-	   MP3AudioProcessableFile(File fileToProcess, String tmpDirPath)
-	   {
-		   this.audioFile = fileToProcess;
-		   this.fileName = fileToProcess.getName();
-		   this.filePath = fileToProcess.getPath();
-		   fetchFileIntoFileInputStream();
-		   validateFile();
-		   if(isValidFile)
-		   {
-			   File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
-			   wavProcessableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
-	               fileToProcess.getName());
-		   }
-	   }
+      private final static int VERSION_1 = 0x08;
+      private final static int LAYER_3 = 0x02;
+      private final static int ID3 = 0x334449;
+      private final static int VERSION_MASK = 0x000800;
+      private final static int LAYER_MASK = 0x000200;
+      private AudioProcessableFile wavProcessableFile = null;
 
-	
-	public void validateFile() {
-		if (!isValidFile())
-            return;	
-		byte[] arrayFor3Bytes = new byte[3];
-		byte[] arrayFor4Bytes = new byte[4];
-        try
-        {
-        	audioFileInputStream.read(arrayFor3Bytes);
-        	int nextByte = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
-        	if(nextByte == ID3)
-        	{
-        		audioFileInputStream.skip(3);
-            	audioFileInputStream.read(arrayFor4Bytes);
-            	nextByte = (int) Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-            	
-            	byte ignoreMSBMask = (byte)0x7F;
-            	long size = Utilities.convertBytesToLong(arrayFor4Bytes, 7, ignoreMSBMask);
-            	audioFileInputStream.skip(size);
-            	audioFileInputStream.read(arrayFor3Bytes);
-            	nextByte = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
-        	}
-        
-        	String versionError = "MP3 file should be version 1";
-        	isValidFile = AssertTests.assertTrue(versionError,
-        			((nextByte & VERSION_MASK) >> 8) == VERSION_1);
-        
-           if(!isValidFile)
-        	   return;
-           
-           String layerError = "MP3 file should be Layer 3";
-           isValidFile = AssertTests.assertTrue(layerError, 
-        		   ((nextByte & LAYER_MASK) >> 8)== LAYER_3);
-        }
-        catch (IOException e)
-        {
-        	AssertTests.assertTrue(fileName + " Invalid File Header", false);
-        }
-        return;
-	}
-	
+      MP3AudioProcessableFile(File fileToProcess, String tmpDirPath)
+      {
+         this.audioFile = fileToProcess;
+         this.fileName = fileToProcess.getName();
+         this.filePath = fileToProcess.getPath();
+         fetchFileIntoFileInputStream();
+         validateFile();
+         if (isValidFile)
+         {
+            File wavFile = convertMP3ToWAVFile(fileToProcess, tmpDirPath);
+            wavProcessableFile =
+                  new WAVAudioProcessableFile(wavFile, tmpDirPath,
+                        fileToProcess.getName());
+         }
+      }
 
-	@Override
-	public void compare(AudioProcessableFile ap) 
-	{
-		wavProcessableFile.compare(ap);
-	}
+      /**
+       * ID3 Header Format
+       * 
+       * Offset | Meaning | (in bytes) | | 0 | ID3 | Read 3 | ID3 Version | Skip
+       * 5 | ID3 Flags | Read 6 | ID3 size | Read
+       * 
+       * MP3 Header Format
+       * 
+       * Offset | Meaning | (in bits) | | 0 | Sync Word | Skip 12 | MP3 Version1
+       * | Read 13 | Layer III | Read
+       */
+      public void validateFile()
+      {
+         if (!isValidFile())
+            return;
+         byte[] arrayFor3Bytes = new byte[3];
+         byte[] arrayFor4Bytes = new byte[4];
+         try
+         {
+            audioFileInputStream.read(arrayFor3Bytes);
+            int nextByte =
+                  (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+            if (nextByte == ID3)
+            {
+               audioFileInputStream.skip(3);
+               audioFileInputStream.read(arrayFor4Bytes);
+               nextByte =
+                     (int) Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
 
-	@Override
-	public String getFileShortName() 
-	{
-		return wavProcessableFile.getFileShortName();
-	}
+               byte ignoreMSBMask = (byte) 0x7F;
+               long size =
+                     Utilities.convertBytesToLong(arrayFor4Bytes, 7,
+                           ignoreMSBMask);
+               audioFileInputStream.skip(size);
+               audioFileInputStream.read(arrayFor3Bytes);
+               nextByte =
+                     (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+            }
 
-	@Override
-	public double getDuration() 
-	{
-		return wavProcessableFile.getDuration();
-	}
+            String versionError = "MP3 file should be version 1";
+            isValidFile =
+                  AssertTests.assertTrue(versionError,
+                        ((nextByte & VERSION_MASK) >> 8) == VERSION_1);
 
-	@Override
-	public ArrayList<Double> getMagnitudes() 
-	{
-		return wavProcessableFile.getMagnitudes();
-	}
-	   
-	public AudioProcessableFile getWAVAudioProcessableFile()
-    {
-  	  return wavProcessableFile;
-    }
-	   /**
-	    * convertMP3ToWAVFile : File, String -> File
-	    * @param mp3File : The mp3File which is to be converted
-	    * @param tmpDirPath : The temperory directory path in which the temperory
-	    * file will be created
-	    * @return File : The temperory File after converting the given original
-	    * File 
-	    */
-	   static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
-	   {
-	      String updatedFilePath = tmpDirPath + mp3File.getName();
-	      Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample", "44.1",
-	            mp3File.getPath(), updatedFilePath);
-	      String newFilePath = updatedFilePath + ".wav";
-	      Utilities.executeCommand(LAME_CONVERTER_PATH, "--decode",
-	            updatedFilePath, newFilePath);
-	      return new File(newFilePath);
-	   }
+            if (!isValidFile)
+               return;
+
+            String layerError = "MP3 file should be Layer 3";
+            isValidFile =
+                  AssertTests.assertTrue(layerError,
+                        ((nextByte & LAYER_MASK) >> 8) == LAYER_3);
+         }
+         catch (IOException e)
+         {
+            AssertTests.assertTrue(fileName + " Invalid File Header", false);
+         }
+         return;
+      }
+
+      @Override
+      public void compare(AudioProcessableFile ap)
+      {
+         wavProcessableFile.compare(ap);
+      }
+
+      @Override
+      public String getFileShortName()
+      {
+         return wavProcessableFile.getFileShortName();
+      }
+
+      @Override
+      public double getDuration()
+      {
+         return wavProcessableFile.getDuration();
+      }
+
+      @Override
+      public ArrayList<Double> getMagnitudes()
+      {
+         return wavProcessableFile.getMagnitudes();
+      }
+
+      public AudioProcessableFile getWAVAudioProcessableFile()
+      {
+         return wavProcessableFile;
+      }
+
+      /**
+       * convertMP3ToWAVFile : File, String -> File
+       * 
+       * @param mp3File
+       *           : The mp3File which is to be converted
+       * @param tmpDirPath
+       *           : The temperory directory path in which the temperory file
+       *           will be created
+       * @return File : The temperory File after converting the given original
+       *         File
+       */
+      static File convertMP3ToWAVFile(File mp3File, String tmpDirPath)
+      {
+         String updatedFilePath = tmpDirPath + mp3File.getName();
+         Utilities.executeCommand(LAME_CONVERTER_PATH, "-a", "--resample",
+               "44.1", mp3File.getPath(), updatedFilePath);
+         String newFilePath = updatedFilePath + ".wav";
+         Utilities.executeCommand(LAME_CONVERTER_PATH, "--decode",
+               updatedFilePath, newFilePath);
+         return new File(newFilePath);
+      }
    }
 
    private static class OGGAudioProcessableFile extends AudioProcessableBase
    {
-	   private AudioProcessableFile wavProcessableFile = null;
-	   private static final int Oggs_HEXA_EQUIVALENT = 0X5367674F;
-	   private static final int vor_HEXA_EQUIVALENT = 0X726F76;
-	   private static final int bis_HEXA_EQUIVALENT = 0X736962;
-	   OGGAudioProcessableFile(File fileToProcess, String tmpDirPath)
-	   {
-		   this.audioFile = fileToProcess;
-		   this.fileName = fileToProcess.getName();
-		   this.filePath = fileToProcess.getPath();
-		   fetchFileIntoFileInputStream();
-		   validateFile();
-		   if(isValidFile)
-		   {
-			   File wavFile = convertOGGToWAVFile(fileToProcess, tmpDirPath);
-			   wavProcessableFile = new WAVAudioProcessableFile(wavFile, tmpDirPath,
-	               fileToProcess.getName());
-		   }
-	   }
+      private AudioProcessableFile wavProcessableFile = null;
+      private static final int Oggs_HEXA_EQUIVALENT = 0X5367674F;
+      private static final int vor_HEXA_EQUIVALENT = 0X726F76;
+      private static final int bis_HEXA_EQUIVALENT = 0X736962;
 
-	   public void validateFile()
-	   {
-		   if (!isValidFile())
-	            return;	
-			byte[] arrayFor4Bytes = new byte[4];
-			byte[] arrayFor3Bytes = new byte[3];
-	        try
-	        {
-	        	String oggsError = "Improper Ogg file";
-	           audioFileInputStream.read(arrayFor4Bytes);
-	           int oggsValue = (int) Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
-	           isValidFile = AssertTests.assertTrue(oggsError, 
-	        		   oggsValue == Oggs_HEXA_EQUIVALENT);
-	           
-	           if(!isValidFile)
-	        	   return;
-	           
-	           audioFileInputStream.skip(25);
-	           
-	           String vorbisError = "The .ogg file should be of vorbis format";
-	           audioFileInputStream.read(arrayFor3Bytes);
-	           int vorVal = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
-	           isValidFile = AssertTests.assertTrue(vorbisError, 
-	        		   vorVal == vor_HEXA_EQUIVALENT);
-	           
-	           if(!isValidFile)
-	        	   return;
-	           
-	           audioFileInputStream.read(arrayFor3Bytes);
-	           int bisVal = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
-	           isValidFile = AssertTests.assertTrue("Vor Error", 
-	        		   bisVal == bis_HEXA_EQUIVALENT);
-	        }
-	        catch (IOException e)
-	        {
-	        	AssertTests.assertTrue(fileName + " Invalid File Header", false);
-	        }
-	        return;
-	   }
-	   
-	   public void compare(AudioProcessableFile ap) 
-	   {
-			wavProcessableFile.compare(ap);
-	   }
+      OGGAudioProcessableFile(File fileToProcess, String tmpDirPath)
+      {
+         this.audioFile = fileToProcess;
+         this.fileName = fileToProcess.getName();
+         this.filePath = fileToProcess.getPath();
+         fetchFileIntoFileInputStream();
+         validateFile();
+         if (isValidFile)
+         {
+            File wavFile = convertOGGToWAVFile(fileToProcess, tmpDirPath);
+            wavProcessableFile =
+                  new WAVAudioProcessableFile(wavFile, tmpDirPath,
+                        fileToProcess.getName());
+         }
+      }
 
-		@Override
-		public String getFileShortName() 
-		{
-			return wavProcessableFile.getFileShortName();
-		}
+      /**
+       * Header Format Offset : Name 0 : 'Oggs' 4 : Version (skipping) 5 :
+       * Header Type (skipping) 6 : Granule Position (skipping) 14 : Bitstream
+       * Serial Number (skipping) 18 : Page Sequence Number (skipping) 22 :
+       * Checksum (skipping) 26 : Page Segments (skipping) 27 : Segment Table
+       * (skipping) 28 : Packet type (skipping) 29 : 'vorbis'
+       *
+       */
+      public void validateFile()
+      {
+         if (!isValidFile())
+            return;
+         byte[] arrayFor4Bytes = new byte[4];
+         byte[] arrayFor3Bytes = new byte[3];
+         try
+         {
+            String oggsError = "Improper Ogg file";
+            audioFileInputStream.read(arrayFor4Bytes);
+            int oggsValue =
+                  (int) Utilities.getLittleEndian(arrayFor4Bytes, 0, 4);
+            isValidFile =
+                  AssertTests.assertTrue(oggsError,
+                        oggsValue == Oggs_HEXA_EQUIVALENT);
 
-		@Override
-		public double getDuration() 
-		{
-			return wavProcessableFile.getDuration();
-		}
+            if (!isValidFile)
+               return;
 
-		@Override
-		public ArrayList<Double> getMagnitudes() 
-		{
-			return wavProcessableFile.getMagnitudes();
-		}
-		   
-		public AudioProcessableFile getWAVAudioProcessableFile()
-	    {
-	  	  return wavProcessableFile;
-	    }
+            audioFileInputStream.skip(25);
 
-	   static File convertOGGToWAVFile(File oggFile, String tmpDirPath)
-	   {
-		   String newFilePath = tmpDirPath + oggFile.getName() + ".wav";
-		   Utilities.executeCommand(OGG_CONVERTER_PATH, oggFile.getPath(), "-b", 
-				   "16", "-o", newFilePath);
-		   return new File(newFilePath);
-	   }
+            String vorbisError = "The .ogg file should be of vorbis format";
+            audioFileInputStream.read(arrayFor3Bytes);
+            int vorVal = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+            isValidFile =
+                  AssertTests.assertTrue(vorbisError,
+                        vorVal == vor_HEXA_EQUIVALENT);
+
+            if (!isValidFile)
+               return;
+
+            audioFileInputStream.read(arrayFor3Bytes);
+            int bisVal = (int) Utilities.getLittleEndian(arrayFor3Bytes, 0, 3);
+            isValidFile =
+                  AssertTests.assertTrue("Vor Error",
+                        bisVal == bis_HEXA_EQUIVALENT);
+         }
+         catch (IOException e)
+         {
+            AssertTests.assertTrue(fileName + " Invalid File Header", false);
+         }
+         return;
+      }
+
+      public void compare(AudioProcessableFile ap)
+      {
+         wavProcessableFile.compare(ap);
+      }
+
+      @Override
+      public String getFileShortName()
+      {
+         return wavProcessableFile.getFileShortName();
+      }
+
+      @Override
+      public double getDuration()
+      {
+         return wavProcessableFile.getDuration();
+      }
+
+      @Override
+      public ArrayList<Double> getMagnitudes()
+      {
+         return wavProcessableFile.getMagnitudes();
+      }
+
+      public AudioProcessableFile getWAVAudioProcessableFile()
+      {
+         return wavProcessableFile;
+      }
+
+      static File convertOGGToWAVFile(File oggFile, String tmpDirPath)
+      {
+         String newFilePath = tmpDirPath + oggFile.getName() + ".wav";
+         Utilities.executeCommand(OGG_CONVERTER_PATH, oggFile.getPath(), "-b",
+               "16", "-o", newFilePath);
+         return new File(newFilePath);
+      }
    }
 }

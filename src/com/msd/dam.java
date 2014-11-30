@@ -6,9 +6,7 @@ public class dam
     * static main : String[] -> void
     * @param args : The command line arguments
     * Effect: The program starts execution from this method.
-    *         If the 'args' is a valid command, the program compares the
-    *         two files else prints message through standard error and 
-    *         exits with status other than 0
+    *         It validates the arguments against 
     */
    public static void main(String[] args)
    {
